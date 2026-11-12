@@ -12,6 +12,8 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- `GET staff/shipments/{id}/` (staff): one shipment with its timeline and
+  `allowed_transitions`.
 - `ShipmentResponse.allowed_transitions`: the statuses the caller may move
   the shipment to now (FSM table + role; empty for a buyer), so a staff UI
   never mirrors the state table.

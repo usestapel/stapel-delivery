@@ -24,6 +24,7 @@ EXPECTED = {
     "ShipmentListView": ([permissions.IsAuthenticated], ANONYMOUS_ALLOWED),
     "ShipmentDetailView": ([permissions.IsAuthenticated], ANONYMOUS_ALLOWED),
     "StaffShipmentListView": ([IsStaffUser], ANONYMOUS_DENIED),
+    "StaffShipmentDetailView": ([IsStaffUser], ANONYMOUS_DENIED),
     "StaffShipmentTrackingView": ([IsStaffUser], ANONYMOUS_DENIED),
     "StaffShipmentTransitionView": ([IsStaffUser], ANONYMOUS_DENIED),
 }

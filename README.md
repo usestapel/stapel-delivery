@@ -26,7 +26,7 @@ pip install stapel-delivery
 |---|---|
 | Version | `0.1.0` |
 | Python | `>=3.11` (3.11, 3.12, 3.13, 3.14) |
-| HTTP operations | 14 |
+| HTTP operations | 15 |
 | Config axes | 2 |
 | Usage surface | 9 |
 | Extension points | 12 |

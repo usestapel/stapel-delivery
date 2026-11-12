@@ -116,3 +116,18 @@ class TestAllowedTransitions:
         shipment = make_shipment(user.pk, order_id="t2")
         assert auth_client.get(f"{V1}/shipments/{shipment.pk}/").json()["allowed_transitions"] == []
         assert auth_client.get(f"{V1}/shipments/").json()["items"][0]["allowed_transitions"] == []
+
+
+class TestStaffDetail:
+    def test_staff_opens_any_shipment(self, catalog, client_for, staff, user):
+        shipment = make_shipment(user.pk, order_id="d1")
+        body = client_for(staff).get(f"{V1}/staff/shipments/{shipment.pk}/").json()
+        assert (body["order_id"], body["allowed_transitions"]) == ("d1", ["packed", "shipped", "cancelled"])
+        assert body["events"][0]["to_status"] == "pending"
+
+    def test_unknown_is_404_and_a_buyer_is_refused(self, catalog, client_for, staff, user):
+        shipment = make_shipment(user.pk, order_id="d2")
+        missing = client_for(staff).get(f"{V1}/staff/shipments/999999/")
+        assert missing.status_code == 404
+        assert missing.json()["localizable_error"] == "error.404.shipment_not_found"
+        assert client_for(user).get(f"{V1}/staff/shipments/{shipment.pk}/").status_code == 403

@@ -227,6 +227,7 @@ switch. A real carrier's webhook view calls
 | `GET shipments/` | own rows | `?status=&order_id=` + anchor → `ShipmentPage` |
 | `GET shipments/{id}/` | own rows | → `ShipmentResponse` (with `events`) |
 | `GET staff/shipments/` | staff | `?status=&order_id=` + anchor → `ShipmentPage` |
+| `GET staff/shipments/{id}/` | staff | → `ShipmentResponse` (with `allowed_transitions`) |
 | `POST staff/shipments/{id}/transition/` | staff | `ShipmentTransitionRequest {to, note?, location?}` → `ShipmentResponse` |
 | `POST staff/shipments/{id}/tracking/` | staff | `ShipmentTrackingRequest {tracking_number, carrier?}` → `ShipmentResponse` |
 

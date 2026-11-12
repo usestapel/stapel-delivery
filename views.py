@@ -329,6 +329,21 @@ class StaffShipmentListView(_DeliveryView):
 
 
 @extend_schema(tags=TAGS)
+class StaffShipmentDetailView(_DeliveryView):
+    """One shipment with its timeline and the moves staff may make now (staff)."""
+
+    fsm_actor = fsm.STAFF
+    permission_classes = [IsStaffUser]
+    stapel_anonymous_access = ANONYMOUS_DENIED
+    response_serializer_class = ShipmentResponseSerializer
+
+    @extend_schema(operation_id="delivery_staff_shipments_retrieve",
+                   responses={200: ShipmentResponseSerializer})
+    def get(self, request, shipment_id):
+        return self._shipment(shipment_service.get_any(shipment_id))
+
+
+@extend_schema(tags=TAGS)
 class StaffShipmentTrackingView(_DeliveryView):
     """Record the carrier's tracking number (staff)."""
 

@@ -584,6 +584,42 @@
         }
       }
     },
+    "/delivery/api/v1/staff/shipments/{shipment_id}/": {
+      "get": {
+        "operationId": "delivery_staff_shipments_retrieve",
+        "description": "One shipment with its timeline and the moves staff may make now (staff).\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
     "/delivery/api/v1/staff/shipments/{shipment_id}/tracking/": {
       "post": {
         "operationId": "delivery_staff_shipments_tracking",

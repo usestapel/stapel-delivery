@@ -152,7 +152,7 @@
       "intent": "Where the mock carrier is in use (DEFAULT_CARRIER, and with methods=True the method codes); what the posture checks E002/W002 read."
     }
   ],
-  "operations_total": 14,
+  "operations_total": 15,
   "requires": [
     {
       "module": "stapel-core",

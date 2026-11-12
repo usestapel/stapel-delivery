@@ -126,6 +126,12 @@ def r_staff_shipments(env):
     return [c.get(V1 + "/staff/shipments/")], [empty]
 
 
+def r_staff_shipment(env):
+    s = make_shipment(env.user.pk)
+    return [env.client_for(env.staff).get(
+        _url(V1 + "/staff/shipments/{shipment_id}/", shipment_id=s.pk))], []
+
+
 def r_tracking(env):
     s = make_shipment(env.user.pk)
     return [env.client_for(env.staff).post(
@@ -152,6 +158,7 @@ RECIPES = {
     ("GET", V1 + "/shipments/", 200): r_shipments,
     ("GET", V1 + "/shipments/{shipment_id}/", 200): r_shipment,
     ("GET", V1 + "/staff/shipments/", 200): r_staff_shipments,
+    ("GET", V1 + "/staff/shipments/{shipment_id}/", 200): r_staff_shipment,
     ("POST", V1 + "/staff/shipments/{shipment_id}/tracking/", 200): r_tracking,
     ("POST", V1 + "/staff/shipments/{shipment_id}/transition/", 200): r_transition,
 }
