@@ -34,7 +34,16 @@ from ..errors import (
     ERR_404_ADDRESS_NOT_FOUND,
     ERR_409_DELIVERY_UNAVAILABLE,
 )
-from ..models import DeliveryIntent, DeliveryMethod, IntentStatus, MethodKind, PickupPoint, Shipment
+from ..models import (
+    RELEASE_CANCELLED,
+    RELEASE_REASON_MAX_LENGTH,
+    DeliveryIntent,
+    DeliveryMethod,
+    IntentStatus,
+    MethodKind,
+    PickupPoint,
+    Shipment,
+)
 from . import DeliveryError
 from . import addresses as address_service
 from . import rates
@@ -43,7 +52,6 @@ from . import shipments as shipment_service
 logger = logging.getLogger(__name__)
 
 ADJUSTMENT_KIND = "shipping"
-RELEASE_CANCELLED = "cancelled"
 
 
 @dataclass
@@ -320,19 +328,33 @@ def commit(payload: dict) -> dict:
 
 
 def release(payload: dict) -> dict:
-    """Drop a reserved intent; on a committed one (order cancelled) cancel the shipment."""
+    """Undo a reservation; only ``cancelled`` undoes a committed one.
+
+    reserved + any reason -> released (a cancelled one also cancels the
+    order's shipment, if any; a cancel after another release is recorded so
+    a late commit does not ship); committed + ``cancelled`` -> the shipment is
+    cancelled if it has not left; committed + ``checkout_failed`` /
+    ``orphaned`` -> no-op: the pair belongs to a placed order.
+    """
     attempt_key = str(payload["attempt_key"])
-    reason = str(payload.get("reason") or "")
+    reason = str(payload.get("reason") or "")[:RELEASE_REASON_MAX_LENGTH]
     with transaction.atomic():
         intent = DeliveryIntent.objects.select_for_update().filter(attempt_key=attempt_key).first()
         if intent is None:
             return {"ok": True}
+        if intent.status == IntentStatus.COMMITTED and reason != RELEASE_CANCELLED:
+            logger.info("delivery: release(%s) of committed intent %s ignored", reason, attempt_key)
+            return {"ok": True}
         order_id = intent.order_id or str(payload.get("order_id") or "")
-        if intent.status == IntentStatus.RESERVED:
+        if intent.status == IntentStatus.RESERVED or (
+                intent.status == IntentStatus.RELEASED and reason == RELEASE_CANCELLED
+                and intent.release_reason != RELEASE_CANCELLED):
+            # A cancel is remembered over an earlier release: a late commit must not ship.
             intent.status = IntentStatus.RELEASED
-            intent.save(update_fields=["status", "updated_at"])
-    if order_id and (reason == RELEASE_CANCELLED or intent.status == IntentStatus.COMMITTED):
-        shipment_service.cancel_for_order(order_id, reason=f"order {reason or 'released'}")
+            intent.release_reason = reason
+            intent.save(update_fields=["status", "release_reason", "updated_at"])
+    if order_id and reason == RELEASE_CANCELLED:
+        shipment_service.cancel_for_order(order_id, reason="order cancelled")
     return {"ok": True}
 
 

@@ -22,6 +22,7 @@ from ..carriers import CarrierUpdate, carrier_by_slug, get_carrier
 from ..errors import ERR_404_SHIPMENT_NOT_FOUND, ERR_409_SHIPMENT_TRANSITION_INVALID
 from ..models import (
     ACTIVE_STATUSES,
+    RELEASE_CANCELLED,
     DeliveryIntent,
     DeliveryMethod,
     IntentStatus,
@@ -174,10 +175,14 @@ def link_and_create(intent_id: int, order_id: str, lines: list[dict]) -> Shipmen
             logger.warning("delivery: intent %s already belongs to order %s, not %s",
                            intent.attempt_key, intent.order_id, order_id)
             return None
-        if intent.status == IntentStatus.RELEASED:
-            logger.info("delivery: intent %s was released; no shipment for order %s",
+        if intent.status == IntentStatus.RELEASED and intent.release_reason == RELEASE_CANCELLED:
+            logger.info("delivery: intent %s was cancelled; no shipment for order %s",
                         intent.attempt_key, order_id)
             return None
+        if intent.status == IntentStatus.RELEASED:
+            logger.warning("delivery: intent %s was released (%s) before its order %s committed; "
+                           "the order is the fact, shipping it", intent.attempt_key,
+                           intent.release_reason or "no reason", order_id)
         intent.order_id = str(order_id)
         intent.status = IntentStatus.COMMITTED
         intent.save(update_fields=["order_id", "status", "updated_at"])

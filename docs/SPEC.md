@@ -154,12 +154,18 @@ Checkout hooks `delivery.reserve` / `.commit` / `.release` (entry order 200):
   reaches the shipment without riding the bus.
 - **commit** `{attempt_key, token|null, order_id, user_id|null}` (after the
   order transaction commits, retried by orders until `ok`) marks the intent
-  committed and creates the shipment → `{"ok": true}`.
-- **release** `{attempt_key, token|null, order_id|null, reason}`:
-  `checkout_failed` / `orphaned` release a reserved intent (a later reserve
-  on the same key reserves anew); `cancelled` cancels a `pending`/`packed`
-  shipment (actor `system`). All three act on `attempt_key` alone (the token
-  is a convenience) and are idempotent.
+  committed and creates the shipment → `{"ok": true}`. A commit after a
+  `checkout_failed` / `orphaned` release still ships (the placed order is
+  the fact); after a `cancelled` release it is a no-op.
+- **release** `{attempt_key, token|null, order_id|null, reason}`: on a
+  reserved intent any reason releases it (a later reserve on the same key
+  reserves anew; the reason is recorded, and a later `cancelled` overwrites
+  an earlier one). **Only `cancelled` undoes a commit:** it cancels a
+  `pending`/`packed` shipment (actor `system`); `checkout_failed` /
+  `orphaned` on a committed intent is a no-op answering `{"ok": true}`. All
+  three act on `attempt_key` alone (the token is a convenience) and are
+  idempotent. `tests/test_release_semantics.py` is the full (state, event)
+  table.
 
 `orders.order.placed` → one shipment per order (a fallback for the commit
 hook, and the source of the buyer id for a guest and of the order lines).

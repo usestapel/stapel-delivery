@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "delivery.release",
-  "description": "Orders checkout hook, release. checkout_failed/orphaned: the reserved intent is released. cancelled: the order's shipment is cancelled if it has not left (pending/packed). Output: {ok: true}. Idempotent.",
+  "description": "Orders checkout hook, release. On a reserved intent any reason releases it (recorded; a later cancelled overwrites). Only reason cancelled undoes a commit: the order's shipment is cancelled if it has not left (pending/packed). checkout_failed / orphaned on a committed intent is a no-op answering ok. Output: {ok: true}. Idempotent.",
   "type": "object",
   "properties": {
     "attempt_key": {

@@ -26,8 +26,10 @@ shipments with tracking, wired into the orders checkout by name.
   refuses with `error.<4xx>.*` keys; no personal data in `meta`.
 - **Checkout hook** `delivery.reserve` / `commit` / `release`: the choice
   and the recipient snapshot are kept under the checkout attempt key; commit
-  creates the order's shipment; release on cancel cancels it. Idempotent;
-  reserve after release reserves anew.
+  creates the order's shipment; only a `cancelled` release undoes a commit
+  (cancels the shipment) — `checkout_failed` / `orphaned` on a committed
+  intent answer ok and change nothing, and a commit after such a release
+  still ships. Idempotent; reserve after release reserves anew.
 - **Shipments**: one per order (unique), FSM pending → packed → shipped →
   delivered / returned / cancelled with a timeline, tracking number,
   carrier slug and URL; buyer `shipments/` (anchor-paginated, own rows

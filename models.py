@@ -37,6 +37,7 @@ NOTE_MAX_LENGTH = 200
 LOCATION_MAX_LENGTH = 120
 ATTEMPT_KEY_MAX_LENGTH = 64
 FINGERPRINT_MAX_LENGTH = 64
+RELEASE_REASON_MAX_LENGTH = 32
 
 #: Zone match lists are bounded (admin input, but read on every quote).
 MAX_ZONE_ENTRIES = 500
@@ -83,6 +84,10 @@ class ShipmentStatus(models.TextChoices):
     DELIVERED = "delivered", "Delivered"
     RETURNED = "returned", "Returned"
     CANCELLED = "cancelled", "Cancelled"
+
+
+#: The one release reason that undoes a committed checkout (orders contract delta 13).
+RELEASE_CANCELLED = "cancelled"
 
 
 class IntentStatus(models.TextChoices):
@@ -270,6 +275,8 @@ class DeliveryIntent(models.Model):
                                          help_text="sha256 of currency + sorted lines.")
     order_id = models.CharField(max_length=ORDER_ID_MAX_LENGTH, blank=True, default="", db_index=True,
                                 help_text="The order this intent became; blank until known.")
+    release_reason = models.CharField(max_length=RELEASE_REASON_MAX_LENGTH, blank=True, default="",
+                                      help_text="Reason of the release that ended a reserved intent.")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True, help_text="First reserve.")
     updated_at = models.DateTimeField(auto_now=True, help_text="Last change.")
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "delivery.commit",
-  "description": "Orders checkout hook, commit (after the order transaction commits). Binds the intent of attempt_key to order_id and creates the shipment. Output: {ok: true}. Idempotent; acts on attempt_key alone (token may be null).",
+  "description": "Orders checkout hook, commit (after the order transaction commits). Binds the intent of attempt_key to order_id and creates the shipment; a commit after a checkout_failed/orphaned release still ships, after a cancelled release it is a no-op. Output: {ok: true}. Idempotent; acts on attempt_key alone (token may be null).",
   "type": "object",
   "properties": {
     "attempt_key": {
