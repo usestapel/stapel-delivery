@@ -12,6 +12,9 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- Error translations `translations/errors.{ru,es}.json` for every owned
+  key (shipped in the wheel), gated by `tests/test_error_i18n.py` (coverage,
+  placeholders, byte form, package-data).
 - Error params declared: `delivery_method_unknown` / `delivery_unavailable`
   (`method`), `pickup_point_unknown` (`pickup_point`),
   `delivery_address_invalid` (`field`); an unknown carrier on the tracking

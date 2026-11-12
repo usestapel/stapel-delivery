@@ -1,0 +1,14 @@
+{
+  "error.400.carrier_unknown": "Перевозчик {carrier} не подключён",
+  "error.400.delivery_address_invalid": "Проверьте адрес доставки: {field}",
+  "error.400.delivery_address_required": "Укажите адрес доставки",
+  "error.400.delivery_method_required": "Выберите способ доставки",
+  "error.400.delivery_method_unknown": "Способ доставки {method} недоступен",
+  "error.400.pickup_point_required": "Выберите пункт выдачи",
+  "error.400.pickup_point_unknown": "Пункт выдачи {pickup_point} недоступен",
+  "error.404.address_not_found": "Адрес не найден",
+  "error.404.shipment_not_found": "Отправление не найдено",
+  "error.409.delivery_unavailable": "Способ доставки {method} не доставляет по этому адресу",
+  "error.409.shipment_transition_invalid": "Отправление нельзя перевести из «{from}» в «{to}»",
+  "error.409.too_many_addresses": "Можно сохранить не больше {max} адресов"
+}

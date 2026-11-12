@@ -1,0 +1,14 @@
+{
+  "error.400.carrier_unknown": "El transportista {carrier} no está registrado",
+  "error.400.delivery_address_invalid": "Revisa la dirección de entrega: {field}",
+  "error.400.delivery_address_required": "Indica una dirección de entrega",
+  "error.400.delivery_method_required": "Elige un método de entrega",
+  "error.400.delivery_method_unknown": "El método de entrega {method} no está disponible",
+  "error.400.pickup_point_required": "Elige un punto de recogida",
+  "error.400.pickup_point_unknown": "El punto de recogida {pickup_point} no está disponible",
+  "error.404.address_not_found": "Dirección no encontrada",
+  "error.404.shipment_not_found": "Envío no encontrado",
+  "error.409.delivery_unavailable": "El método de entrega {method} no entrega en esta dirección",
+  "error.409.shipment_transition_invalid": "El envío no puede pasar de {from} a {to}",
+  "error.409.too_many_addresses": "Puedes guardar como máximo {max} direcciones"
+}
