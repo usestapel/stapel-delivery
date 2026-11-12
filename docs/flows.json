@@ -210,6 +210,19 @@
         "note": "Every status move is announced",
         "note_key": "flow.delivery.fulfil.step.4.note",
         "ref": "delivery.shipment.status_changed"
+      },
+      {
+        "kind": "http",
+        "order": 4,
+        "note": "Open one shipment and see the moves allowed now",
+        "note_key": "flow.delivery.fulfil.step.4.note",
+        "ref": "stapel_delivery.views.StaffShipmentDetailView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/staff/shipments/<int:shipment_id>/"
+          }
+        ]
       }
     ]
   },

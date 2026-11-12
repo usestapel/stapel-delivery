@@ -339,6 +339,7 @@ class StaffShipmentDetailView(_DeliveryView):
 
     @extend_schema(operation_id="delivery_staff_shipments_retrieve",
                    responses={200: ShipmentResponseSerializer})
+    @flow_step(FULFIL, order=4, note="Open one shipment and see the moves allowed now")
     def get(self, request, shipment_id):
         return self._shipment(shipment_service.get_any(shipment_id))
 
