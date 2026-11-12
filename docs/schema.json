@@ -1,0 +1,1773 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/delivery/api/v1/addresses/": {
+      "get": {
+        "operationId": "delivery_addresses_list",
+        "description": "My address book (bounded by MAX_ADDRESSES) and adding to it.\n\n**Permissions:** `IsNotAnonymousUser`",
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "delivery_addresses_create",
+        "description": "My address book (bounded by MAX_ADDRESSES) and adding to it.\n\n**Permissions:** `IsNotAnonymousUser`",
+        "tags": [
+          "Delivery"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/addresses/{address_id}/": {
+      "get": {
+        "operationId": "delivery_addresses_retrieve",
+        "description": "One of my addresses; a foreign id is a 404 like an absent one.\n\n**Permissions:** `IsNotAnonymousUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "delivery_addresses_partial_update",
+        "description": "One of my addresses; a foreign id is a 404 like an absent one.\n\n**Permissions:** `IsNotAnonymousUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedAddressRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedAddressRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedAddressRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delivery_addresses_destroy",
+        "description": "One of my addresses; a foreign id is a 404 like an absent one.\n\n**Permissions:** `IsNotAnonymousUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/addresses/{address_id}/default/": {
+      "post": {
+        "operationId": "delivery_addresses_make_default",
+        "description": "Make one of my addresses the default.\n\n**Permissions:** `IsNotAnonymousUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/methods/": {
+      "get": {
+        "operationId": "delivery_methods_list",
+        "description": "Enabled delivery methods, in display order.\n\n**Permissions:** `AllowAny`",
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMethodList"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/options/": {
+      "post": {
+        "operationId": "delivery_options_create",
+        "description": "Methods with prices for a cart and a destination (zero writes).\n\n**Permissions:** `AllowAny`",
+        "tags": [
+          "Delivery"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryOptionsRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryOptionsRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryOptionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOptionsResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/pickup-points/": {
+      "get": {
+        "operationId": "delivery_pickup_points_list",
+        "description": "Enabled pickup points, filterable by method, country and city.\n\n**Permissions:** `AllowAny`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "anchor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque anchor from next_anchor/prev_anchor (exclusive)."
+          },
+          {
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "type": "string"
+            },
+            "description": "City, case-insensitive."
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            },
+            "description": "ISO 3166 alpha-2."
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "next",
+                "prev"
+              ]
+            },
+            "description": "Walk direction from the anchor."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page size, default 50, max 200."
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Method code."
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupPointPage"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/shipments/": {
+      "get": {
+        "operationId": "delivery_shipments_list",
+        "description": "My shipments, newest first.\n\n**Permissions:** `IsAuthenticated`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "anchor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque anchor from next_anchor/prev_anchor (exclusive)."
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "next",
+                "prev"
+              ]
+            },
+            "description": "Walk direction from the anchor."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page size, default 20, max 100."
+          },
+          {
+            "in": "query",
+            "name": "order_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the shipment of this order."
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cancelled",
+                  "delivered",
+                  "packed",
+                  "pending",
+                  "returned",
+                  "shipped"
+                ]
+              }
+            },
+            "description": "Filter by status (repeatable)."
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentPage"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/shipments/{shipment_id}/": {
+      "get": {
+        "operationId": "delivery_shipments_retrieve",
+        "description": "Track one of my shipments: status, tracking link, timeline.\n\n**Permissions:** `IsAuthenticated`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/staff/shipments/": {
+      "get": {
+        "operationId": "delivery_staff_shipments_list",
+        "description": "Every shipment, newest first (staff).\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "anchor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque anchor from next_anchor/prev_anchor (exclusive)."
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "next",
+                "prev"
+              ]
+            },
+            "description": "Walk direction from the anchor."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page size, default 20, max 100."
+          },
+          {
+            "in": "query",
+            "name": "order_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the shipment of this order."
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cancelled",
+                  "delivered",
+                  "packed",
+                  "pending",
+                  "returned",
+                  "shipped"
+                ]
+              }
+            },
+            "description": "Filter by status (repeatable)."
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentPage"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/staff/shipments/{shipment_id}/tracking/": {
+      "post": {
+        "operationId": "delivery_staff_shipments_tracking",
+        "description": "Record the carrier's tracking number (staff).\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTrackingRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTrackingRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTrackingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delivery/api/v1/staff/shipments/{shipment_id}/transition/": {
+      "post": {
+        "operationId": "delivery_staff_shipments_transition",
+        "description": "Move a shipment along its lifecycle (staff).\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Delivery"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTransitionRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTransitionRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddressList": {
+        "type": "object",
+        "description": "The whole book: bounded by MAX_ADDRESSES, so it is not paginated.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressResponse"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "MAX_ADDRESSES."
+          }
+        },
+        "required": [
+          "count",
+          "items",
+          "max"
+        ]
+      },
+      "AddressRequest": {
+        "type": "object",
+        "description": "A recipient address as checkout and the book accept it.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Recipient name.",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "description": "Recipient phone.",
+            "maxLength": 32,
+            "pattern": "^\\+?[0-9][0-9 ()\\-.]{2,31}$"
+          },
+          "line1": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "line2": {
+            "type": "string",
+            "default": "",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "default": "",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "oneOf": [
+              {
+                "type": "string",
+                "default": "",
+                "maxLength": 20,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9 \\-]{0,19}$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO 3166 alpha-2.",
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Za-z]{2}$"
+          },
+          "latitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "default": "",
+            "description": "Home, Office…",
+            "maxLength": 60
+          },
+          "is_default": {
+            "type": "boolean",
+            "default": false,
+            "description": "Make this the default address."
+          }
+        },
+        "required": [
+          "city",
+          "country",
+          "line1",
+          "name",
+          "phone"
+        ]
+      },
+      "AddressResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "line1": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "line2": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2
+          },
+          "latitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "city",
+          "country",
+          "created_at",
+          "id",
+          "is_default",
+          "label",
+          "latitude",
+          "line1",
+          "line2",
+          "longitude",
+          "name",
+          "phone",
+          "postal_code",
+          "region",
+          "updated_at"
+        ]
+      },
+      "CartLineInput": {
+        "type": "object",
+        "properties": {
+          "purchasable_type": {
+            "type": "string",
+            "default": "",
+            "maxLength": 32
+          },
+          "purchasable_key": {
+            "type": "string",
+            "default": "",
+            "maxLength": 255
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 999,
+            "minimum": 1
+          },
+          "unit_price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "attrs": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The cart line's attrs; weight_grams is read."
+          }
+        },
+        "required": [
+          "quantity"
+        ]
+      },
+      "DeliveryMethodList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryMethodResponse"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "DeliveryMethodResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MethodKindEnum"
+          },
+          "eta_min_days": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "eta_max_days": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          }
+        },
+        "required": [
+          "code",
+          "description",
+          "eta_max_days",
+          "eta_min_days",
+          "kind",
+          "name"
+        ]
+      },
+      "DeliveryOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MethodKindEnum"
+          },
+          "eta_min_days": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "eta_max_days": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true,
+            "description": "null when not available."
+          },
+          "price_is_minimum": {
+            "type": "boolean",
+            "description": "Pickup: the cheapest point's price."
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3
+          },
+          "free_reason": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FreeReasonEnum"
+              },
+              {
+                "$ref": "#/components/schemas/NullEnum"
+              }
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error key why it is not available.",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "available",
+          "code",
+          "currency",
+          "description",
+          "eta_max_days",
+          "eta_min_days",
+          "free_reason",
+          "kind",
+          "name",
+          "price",
+          "price_is_minimum",
+          "reason"
+        ]
+      },
+      "DeliveryOptionsRequest": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "pattern": "^[A-Z]{3}$"
+          },
+          "subtotal": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartLineInput"
+            }
+          },
+          "address": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Destination"
+              }
+            ],
+            "nullable": true,
+            "description": "Where to (country is enough to price)."
+          },
+          "address_id": {
+            "type": "integer",
+            "nullable": true,
+            "description": "An entry of my address book instead."
+          }
+        },
+        "required": [
+          "currency",
+          "lines",
+          "subtotal"
+        ]
+      },
+      "DeliveryOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryOption"
+            }
+          }
+        },
+        "required": [
+          "options"
+        ]
+      },
+      "Destination": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "description": "ISO 3166 alpha-2.",
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Za-z]{2}$"
+          },
+          "region": {
+            "type": "string",
+            "default": "",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "type": "string",
+            "default": "",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "country"
+        ]
+      },
+      "FreeReasonEnum": {
+        "enum": [
+          "threshold",
+          "promotion"
+        ],
+        "type": "string",
+        "description": "* `threshold` - threshold\n* `promotion` - promotion"
+      },
+      "HoursWindow": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "integer",
+            "maximum": 6,
+            "minimum": 0,
+            "description": "0 = Monday … 6 = Sunday."
+          },
+          "opens": {
+            "type": "string",
+            "maxLength": 5,
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          },
+          "closes": {
+            "type": "string",
+            "maxLength": 5,
+            "pattern": "^(([01][0-9]|2[0-3]):[0-5][0-9]|24:00)$"
+          }
+        },
+        "required": [
+          "closes",
+          "opens",
+          "weekday"
+        ]
+      },
+      "MethodKindEnum": {
+        "enum": [
+          "courier",
+          "pickup",
+          "digital"
+        ],
+        "type": "string",
+        "description": "* `courier` - Courier\n* `pickup` - Pickup point\n* `digital` - Digital"
+      },
+      "NullEnum": {
+        "enum": [
+          null
+        ]
+      },
+      "PatchedAddressRequest": {
+        "type": "object",
+        "description": "A recipient address as checkout and the book accept it.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Recipient name.",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "description": "Recipient phone.",
+            "maxLength": 32,
+            "pattern": "^\\+?[0-9][0-9 ()\\-.]{2,31}$"
+          },
+          "line1": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "line2": {
+            "type": "string",
+            "default": "",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "default": "",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "oneOf": [
+              {
+                "type": "string",
+                "default": "",
+                "maxLength": 20,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9 \\-]{0,19}$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO 3166 alpha-2.",
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Za-z]{2}$"
+          },
+          "latitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "default": "",
+            "description": "Home, Office…",
+            "maxLength": 60
+          },
+          "is_default": {
+            "type": "boolean",
+            "default": false,
+            "description": "Make this the default address."
+          }
+        }
+      },
+      "PickupPointPage": {
+        "type": "object",
+        "properties": {
+          "next_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "prev_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupPointResponse"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "has_next",
+          "has_prev",
+          "items",
+          "next_anchor",
+          "prev_anchor"
+        ]
+      },
+      "PickupPointResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "method": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "line1": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "line2": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2
+          },
+          "latitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+            "nullable": true
+          },
+          "hours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HoursWindow"
+            }
+          },
+          "hours_note": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "city",
+          "code",
+          "country",
+          "hours",
+          "hours_note",
+          "latitude",
+          "line1",
+          "line2",
+          "longitude",
+          "method",
+          "name",
+          "postal_code",
+          "region"
+        ]
+      },
+      "PickupPointSnapshot": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "line2": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "city",
+          "code",
+          "country",
+          "line1",
+          "line2",
+          "name",
+          "postal_code",
+          "region"
+        ]
+      },
+      "RecipientSnapshot": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "line2": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 32
+          }
+        },
+        "required": [
+          "city",
+          "country",
+          "line1",
+          "line2",
+          "name",
+          "phone",
+          "postal_code",
+          "region"
+        ]
+      },
+      "ShipmentActorEnum": {
+        "enum": [
+          "staff",
+          "carrier",
+          "system"
+        ],
+        "type": "string",
+        "description": "* `staff` - staff\n* `carrier` - carrier\n* `system` - system"
+      },
+      "ShipmentEvent": {
+        "type": "object",
+        "properties": {
+          "from_status": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ShipmentStatusEnum"
+              },
+              {
+                "$ref": "#/components/schemas/NullEnum"
+              }
+            ]
+          },
+          "to_status": {
+            "$ref": "#/components/schemas/ShipmentStatusEnum"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ShipmentActorEnum"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actor",
+          "from_status",
+          "location",
+          "note",
+          "occurred_at",
+          "to_status"
+        ]
+      },
+      "ShipmentPage": {
+        "type": "object",
+        "properties": {
+          "next_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "prev_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentResponse"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "has_next",
+          "has_prev",
+          "items",
+          "next_anchor",
+          "prev_anchor"
+        ]
+      },
+      "ShipmentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "number": {
+            "type": "string",
+            "maxLength": 16
+          },
+          "order_id": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "status": {
+            "$ref": "#/components/schemas/ShipmentStatusEnum"
+          },
+          "method_code": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "method_name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "method_kind": {
+            "$ref": "#/components/schemas/MethodKindEnum"
+          },
+          "carrier": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "tracking_number": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "tracking_url": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          },
+          "recipient": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientSnapshot"
+              }
+            ],
+            "nullable": true,
+            "description": "Courier: where it goes."
+          },
+          "pickup_point": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PickupPointSnapshot"
+              }
+            ],
+            "nullable": true,
+            "description": "Pickup: where to collect."
+          },
+          "amount": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "description": "Shipping charged."
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3
+          },
+          "weight_kg": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,9}(?:\\.\\d{0,3})?$",
+            "nullable": true
+          },
+          "shipped_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "delivered_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentEvent"
+            },
+            "description": "Timeline, oldest first."
+          }
+        },
+        "required": [
+          "amount",
+          "carrier",
+          "created_at",
+          "currency",
+          "delivered_at",
+          "events",
+          "id",
+          "method_code",
+          "method_kind",
+          "method_name",
+          "number",
+          "order_id",
+          "pickup_point",
+          "recipient",
+          "shipped_at",
+          "status",
+          "tracking_number",
+          "tracking_url",
+          "updated_at",
+          "weight_kg"
+        ]
+      },
+      "ShipmentStatusEnum": {
+        "enum": [
+          "pending",
+          "packed",
+          "shipped",
+          "delivered",
+          "returned",
+          "cancelled"
+        ],
+        "type": "string",
+        "description": "* `pending` - Pending\n* `packed` - Packed\n* `shipped` - Shipped\n* `delivered` - Delivered\n* `returned` - Returned\n* `cancelled` - Cancelled"
+      },
+      "ShipmentTrackingRequest": {
+        "type": "object",
+        "properties": {
+          "tracking_number": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "carrier": {
+            "oneOf": [
+              {
+                "type": "string",
+                "default": "",
+                "maxLength": 32,
+                "pattern": "^[-a-zA-Z0-9_]+$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          }
+        },
+        "required": [
+          "tracking_number"
+        ]
+      },
+      "ShipmentTransitionRequest": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "$ref": "#/components/schemas/ShipmentTransitionTargetEnum"
+          },
+          "note": {
+            "type": "string",
+            "default": "",
+            "maxLength": 200
+          },
+          "location": {
+            "type": "string",
+            "default": "",
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "to"
+        ]
+      },
+      "ShipmentTransitionTargetEnum": {
+        "enum": [
+          "packed",
+          "shipped",
+          "delivered",
+          "returned",
+          "cancelled"
+        ],
+        "type": "string",
+        "description": "* `packed` - packed\n* `shipped` - shipped\n* `delivered` - delivered\n* `returned` - returned\n* `cancelled` - cancelled"
+      }
+    },
+    "securitySchemes": {
+      "JWTCookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "stapel_jwt",
+        "description": "JWT token stored in cookie. Login via /auth/admin/ to get the cookie."
+      }
+    }
+  }
+}

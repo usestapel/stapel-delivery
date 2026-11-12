@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "delivery.commit",
+  "description": "Orders checkout hook, commit (after the order transaction commits). Binds the intent of attempt_key to order_id and creates the shipment. Output: {ok: true}. Idempotent; acts on attempt_key alone (token may be null).",
+  "type": "object",
+  "properties": {
+    "attempt_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "order_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "attempt_key"
+  ],
+  "additionalProperties": true
+}

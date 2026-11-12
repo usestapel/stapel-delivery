@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "delivery.options",
+  "description": "Every enabled method with its price for a cart and a destination. Output: {options: [{code, name, description, kind, eta_min_days, eta_max_days, available, price ('12.50' | null), price_is_minimum, currency, free_reason ('threshold' | 'promotion' | null), reason (error key | null)}]}.",
+  "type": "object",
+  "properties": {
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "subtotal": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "purchasable_type": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "purchasable_key": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "line_total": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "attrs": {
+            "type": "object",
+            "description": "The purchasable resolver's extra scalar fields; delivery reads weight_grams (integer grams) and shippable (false = not shipped)."
+          }
+        },
+        "required": [
+          "quantity"
+        ],
+        "additionalProperties": true
+      },
+      "maxItems": 100
+    },
+    "adjustments_so_far": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Earlier adjusters' adjustments; meta.free_shipping=true (optionally narrowed by meta.free_shipping_methods) makes shipping free."
+      }
+    },
+    "address": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Destination; country is enough to price (region, postal_code refine).",
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "postal_code": {
+          "type": "string"
+        }
+      }
+    },
+    "address_id": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "currency",
+    "subtotal",
+    "lines"
+  ],
+  "additionalProperties": false
+}

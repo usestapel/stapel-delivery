@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "orders.order.placed",
+  "description": "Consumed from stapel-orders: an order was placed. Delivery creates the order's shipment from the checkout intent (found by attempt_key if present, by order_id if the commit hook linked it, else by user and lines fingerprint). Tolerant reader: orders owns this fact.",
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": "string"
+    },
+    "total": {
+      "type": "string"
+    },
+    "placed_at": {
+      "type": "string"
+    },
+    "attempt_key": {
+      "type": "string"
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "purchasable_type": {
+            "type": "string"
+          },
+          "purchasable_key": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unit_price": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "purchasable_type",
+          "purchasable_key",
+          "quantity",
+          "unit_price"
+        ]
+      }
+    }
+  },
+  "required": [
+    "order_id",
+    "currency",
+    "lines"
+  ],
+  "additionalProperties": true
+}

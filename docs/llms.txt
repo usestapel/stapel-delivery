@@ -1,0 +1,150 @@
+# stapel-delivery 0.1.0
+
+Delivery methods (courier, pickup point, digital), zones matched by country / region / postcode prefix, rates (flat, free above a subtotal, per kilogram when cart lines carry attrs.weight_grams), pickup points with hours and coordinates, a per-user address book with one default, and shipments with a table FSM (pending, packed, shipped, delivered, returned, cancelled), a timeline, tracking number and link. It is the stapel-orders shipping adjuster (delivery.quote, kind shipping, order 200; honours a promotion's meta.free_shipping marker) and a checkout hook (delivery.reserve keeps the validated choice and the address snapshot under the checkout attempt key; commit creates the order's shipment; release on cancel cancels it). Carriers are a strategy registry: manual by default, an auto-advancing mock for prototypes, a documented Carrier ABC for real ones.
+
+Contract: axes 2 · surface 9 · extension points 12 · operations 14 · error codes 53 · flows 4.
+Generated from docs/capabilities.json by `stapel-llms-txt` — do not edit; drift-gated by `make contract-check`.
+
+## Configuration axes — what a product switches on
+Settings keys; `default` is what you get by saying nothing. Turning an axis off unmounts the operations it gates.
+- DEFAULT_CARRIER [enum, default "manual"] — Who moves parcels
+  manual (default): staff record the tracking number and move each shipment. mock: shipments advance to delivered by themselves every few minutes, for demos and prototypes only. A real carrier registers its own name. Values: manual, mock.
+- REQUIRE_METHOD [bool, default true] — Delivery must be chosen
+  true (default): a checkout without a delivery choice is refused with error.400.delivery_method_required (unless nothing in the cart ships). false: such a checkout simply has no shipping line and no shipment. Values: true, false.
+
+## Usage surface — call these before writing your own
+This is the answer to "does Stapel already have something for X?". `instead of` names the outside symbol this one displaces.
+### predicate
+- carrier_names — stapel_delivery.carriers.carrier_names
+  The slugs a method and DEFAULT_CARRIER accept (built-ins <- settings <- runtime); also the environment vocabulary.
+- uses_mock — stapel_delivery.carriers.uses_mock
+  Where the mock carrier is in use (DEFAULT_CARRIER, and with methods=True the method codes); what the posture checks E002/W002 read.
+### factory
+- carrier_by_slug — stapel_delivery.carriers.carrier_by_slug
+  A shipment's carrier for polling and links; an unregistered slug falls back to manual instead of failing the beat.
+- carrier_for_method — stapel_delivery.carriers.carrier_for_method
+  A method's own carrier, or the default — what a new shipment of that method gets.
+- default_carrier — stapel_delivery.carriers.default_carrier
+  The carrier this deployment uses for methods without their own (delivery_settings.DEFAULT_CARRIER).
+- get_carrier — stapel_delivery.carriers.get_carrier
+  The carrier registered under a slug; ImproperlyConfigured when unknown.
+- register_carrier — stapel_delivery.carriers.register_carrier
+  Register (or with None remove) a carrier class under a slug from an AppConfig.ready(); methods and DEFAULT_CARRIER may then name it. The settings twin is STAPEL_DELIVERY['CARRIERS'].
+- reset_carriers — stapel_delivery.carriers.reset_carriers
+  Drop runtime carrier registrations — a test lever.
+- resolve_carrier — stapel_delivery.carriers.resolve_carrier
+  Turn a DEFAULT_CARRIER value (slug or dotted path) into a carrier; the AppSettings resolver for the key.
+
+## Extension points — what a product replaces, fork-free
+- CARRIERS [merge_registry]
+  Carrier strategies by slug: {slug: 'dotted.path.Carrier' | None} merged over the built-ins manual and mock (or register_carrier at runtime). A Carrier registers a parcel (tracking number), polls status updates from the beat and renders a tracking link; a push-style carrier's webhook calls services.shipments.apply_carrier_update.
+- DEFAULT_CARRIER [strategy]
+  The carrier a method without its own carrier uses: manual (default), mock (prototype posture only, check E002/W002) or a registered slug / dotted path.
+- GEOCODE_FUNCTION [setting]
+  A comm Function with the geo.geocode contract that fills missing coordinates of a saved address after commit, best-effort; empty = off.
+- STAPEL_DELIVERY_ADDRESS_PRESENTER / STAPEL_DELIVERY_METHOD_PRESENTER / STAPEL_DELIVERY_OPTIONS_PRESENTER / STAPEL_DELIVERY_PICKUP_POINT_PRESENTER / STAPEL_DELIVERY_SHIPMENT_PRESENTER [presenter]
+  Swap keys (STAPEL_SWAP) for every response presenter, so a host changes what the API shows without forking a view.
+- delivery.options [comm_function]
+  Every enabled method with its price for a cart and a destination (country is enough), with the reason a method is not offered.
+- delivery.quote [comm_function]
+  The orders shipping adjuster: reads context.delivery {method, address | address_id | pickup_point}, answers one shipping adjustment (0.00 when free) or a refusal error key; no personal data in meta.
+- delivery.reserve / delivery.commit / delivery.release [comm_function]
+  The orders checkout hook: reserve stores the choice and the address snapshot under the attempt key; commit binds it to the order and creates the shipment; release drops it, or on an order cancel cancels a shipment that has not left. Idempotent on the attempt key.
+- delivery.shipment.created [comm_event]
+  A placed order got its shipment: ids, method, carrier, status, shipping amount; never the recipient.
+- delivery.shipment.status [comm_function]
+  A shipment's status and tracking for another service, by order_id or shipment_id; no recipient fields.
+- delivery.shipment.status_changed [comm_event]
+  Every shipment move with the actor (staff, carrier, system) and the tracking number; feeds the buyer notification.
+- orders.order.placed [comm_event]
+  Consumed: creates the order's shipment from the checkout intent when the commit hook has not already done it.
+- orders.order.status_changed [comm_event]
+  Consumed: an order moved to cancelled cancels its pending or packed shipment.
+
+## Fits with — fleet dependencies
+- stapel-auth (optional) — addresses and shipments are keyed on request.user; user.merged moves a guest's book and shipments to the account on sign-in
+- stapel-core (required) — comm bus (delivery.* Functions and emits, orders.* and user.merged consumers), AnchorPagination, GDPR owner protocol, posture stage, AppSettings
+- stapel-geo (optional) — GEOCODE_FUNCTION = 'geo.geocode' fills coordinates of saved addresses, by Function name only
+- stapel-notifications (optional) — delivers delivery.shipment_status_changed to the buyer
+- stapel-orders (optional) — calls delivery.quote as its shipping adjuster and delivery.reserve/commit/release as a checkout hook (preset.SETTINGS_DEFAULTS), and emits orders.order.placed / status_changed that create and cancel shipments
+- stapel-promotions (optional) — a free-shipping promotion marks its adjustment meta.free_shipping, which delivery.quote honours
+
+## HTTP operations (14) — call by operationId, never by a typed path
+Paths are relative to `/delivery/api/v1/`.
+### Delivery
+- POST /addresses/ — delivery_addresses_create
+- DELETE /addresses/{address_id}/ — delivery_addresses_destroy
+- GET /addresses/ — delivery_addresses_list
+- POST /addresses/{address_id}/default/ — delivery_addresses_make_default
+- PATCH /addresses/{address_id}/ — delivery_addresses_partial_update
+- GET /addresses/{address_id}/ — delivery_addresses_retrieve
+- GET /methods/ — delivery_methods_list
+- POST /options/ — delivery_options_create
+- GET /pickup-points/ — delivery_pickup_points_list
+- GET /shipments/ — delivery_shipments_list
+- GET /shipments/{shipment_id}/ — delivery_shipments_retrieve
+- GET /staff/shipments/ — delivery_staff_shipments_list
+- POST /staff/shipments/{shipment_id}/tracking/ — delivery_staff_shipments_tracking
+- POST /staff/shipments/{shipment_id}/transition/ — delivery_staff_shipments_transition
+
+## Error codes (53) — the StapelError envelope
+Render `t(code, params)`; branch UX on the remediation. Localized text lives in docs/errors.<lang>.md, not here.
+- error.400.bad_request [400] fix_input
+- error.400.captcha_invalid [400] retry
+- error.400.captcha_required [400] retry
+- error.400.delivery_address_invalid [400] fix_input
+- error.400.delivery_address_required [400] fix_input
+- error.400.delivery_method_required [400] fix_input
+- error.400.delivery_method_unknown [400] fix_input
+- error.400.expected_list [400] fix_input
+- error.400.field.blank [400] fix_input {field}
+- error.400.field.does_not_exist [400] fix_input {field}
+- error.400.field.invalid [400] fix_input {field}
+- error.400.field.invalid_choice [400] fix_input {field}
+- error.400.field.max_length [400] fix_input {field,max_length}
+- error.400.field.max_value [400] fix_input {field,max_value}
+- error.400.field.min_length [400] fix_input {field,min_length}
+- error.400.field.min_value [400] fix_input {field,min_value}
+- error.400.field.null [400] fix_input {field}
+- error.400.field.required [400] fix_input {field}
+- error.400.field.unique [400] fix_input {field}
+- error.400.invalid_ad_id [400] fix_input
+- error.400.pickup_point_required [400] fix_input
+- error.400.pickup_point_unknown [400] fix_input
+- error.400.validation_error [400] fix_input
+- error.400.verification_failed [400] verify
+- error.400.verification_invalid_factor [400] verify
+- error.401.unauthorized [401] reauthenticate
+- error.402.payment_required [402] retry
+- error.403.forbidden [403] retry
+- error.403.network_blocked [403] contact_support
+- error.403.verification_enrollment_required [403] verify
+- error.403.verification_required [403] verify
+- error.404.ad_not_found [404] retry
+- error.404.address_not_found [404] retry
+- error.404.not_found [404] retry
+- error.404.shipment_not_found [404] retry
+- error.404.verification_challenge_not_found [404] verify
+- error.405.method_not_allowed [405] retry
+- error.406.not_acceptable [406] retry
+- error.408.request_timeout [408] retry
+- error.409.conflict [409] fix_input
+- error.409.delivery_unavailable [409] fix_input
+- error.409.shipment_transition_invalid [409] fix_input {from,to}
+- error.409.too_many_addresses [409] fix_input {max}
+- error.410.gone [410] retry
+- error.413.payload_too_large [413] retry
+- error.415.unsupported_media_type [415] retry
+- error.422.unprocessable_entity [422] wait_and_retry
+- error.423.locked [423] wait_and_retry
+- error.423.verification_locked [423] wait_and_retry
+- error.429.rate_limit [429] wait_and_retry {retry_after_minutes}
+- error.429.too_many_requests [429] wait_and_retry
+- error.500.internal [500] contact_support
+- error.503.mandate_unavailable [503] retry
+
+## Documented flows (4) — full steps in docs/flows.json
+- delivery.addresses — Keep an address book
+- delivery.choose — Choose how an order is delivered
+- delivery.fulfil — Ship orders
+- delivery.track — Track my parcel

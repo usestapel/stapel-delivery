@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "delivery.shipment.status",
+  "description": "A shipment's state for another service, by order_id or shipment_id. Output: {found: false} or {found: true, shipment_id, number, order_id, status, method, carrier, tracking_number, tracking_url, shipped_at, delivered_at}. No recipient fields.",
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "shipment_id": {
+      "type": [
+        "string",
+        "integer"
+      ]
+    }
+  },
+  "minProperties": 1,
+  "additionalProperties": false
+}

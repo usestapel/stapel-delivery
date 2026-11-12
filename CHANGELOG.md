@@ -1,0 +1,42 @@
+# Changelog
+
+All notable changes to stapel-delivery are documented here.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Pre-1.0 semver: **minor = breaking**, patch = compatible.
+
+## [Unreleased]
+
+## [0.1.0]
+
+First release: delivery methods, rates, pickup points, an address book and
+shipments with tracking, wired into the orders checkout by name.
+
+### Added
+- **Catalog**: `DeliveryMethod` (courier / pickup / digital), `Zone`
+  (country / region / postcode-prefix lists, most specific wins), `Rate`
+  (flat, free above a subtotal, per kilogram from `attrs.weight_grams` with
+  a flat fallback, weight cap; one currency, never converted),
+  `PickupPoint` (address, coordinates, weekly hours). Admin for all of it.
+- **Address book** `addresses/` (CRUD, one default under a constraint and a
+  row lock, `MAX_ADDRESSES`), optional geocoding through a named Function.
+- **Options** `POST options/` and `delivery.options`: every method with its
+  price for a cart and a destination, or the reason it is not offered.
+- **Orders adjuster** `delivery.quote` (`kind=shipping`, order 200):
+  validates `context.delivery`, honours a promotion's `meta.free_shipping`,
+  refuses with `error.<4xx>.*` keys; no personal data in `meta`.
+- **Checkout hook** `delivery.reserve` / `commit` / `release`: the choice
+  and the recipient snapshot are kept under the checkout attempt key; commit
+  creates the order's shipment; release on cancel cancels it. Idempotent;
+  reserve after release reserves anew.
+- **Shipments**: one per order (unique), FSM pending → packed → shipped →
+  delivered / returned / cancelled with a timeline, tracking number,
+  carrier slug and URL; buyer `shipments/` (anchor-paginated, own rows
+  only) and staff `staff/shipments/` (list, tracking, transition);
+  `orders.order.placed` and `orders.order.status_changed` consumers.
+- **Carriers**: registry with `manual` (default) and an auto-advancing
+  `mock` (posture-gated, E002/W002); `Carrier` ABC for real carriers.
+- Facts `delivery.shipment.created|status_changed`; notification
+  `delivery.shipment_status_changed`; `delivery.shipment.status` Function.
+- `preset.SETTINGS_DEFAULTS` registering the adjuster and the hook with
+  orders; checks E001, E002/W002, W003, W004; GDPR owner; `user.merged`;
+  beat (`poll_carriers`, `purge_intents`) and `delivery_housekeeping`.

@@ -1,0 +1,261 @@
+[
+  {
+    "id": "delivery.addresses",
+    "title": "Keep an address book",
+    "title_key": "flow.delivery.addresses.title",
+    "description": "The buyer saves, edits, removes addresses and picks the default one.",
+    "description_key": "flow.delivery.addresses.description",
+    "actors": [
+      "Buyer"
+    ],
+    "steps": [
+      {
+        "kind": "http",
+        "order": 1,
+        "note": "Open my addresses, the default first",
+        "note_key": "flow.delivery.addresses.step.1.note",
+        "ref": "stapel_delivery.views.AddressListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/addresses/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 2,
+        "note": "Save an address",
+        "note_key": "flow.delivery.addresses.step.2.note",
+        "ref": "stapel_delivery.views.AddressListView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/delivery/api/v1/addresses/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 3,
+        "note": "Edit an address",
+        "note_key": "flow.delivery.addresses.step.3.note",
+        "ref": "stapel_delivery.views.AddressDetailView.patch",
+        "endpoints": [
+          {
+            "method": "PATCH",
+            "path": "/delivery/api/v1/addresses/<int:address_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 4,
+        "note": "Remove an address",
+        "note_key": "flow.delivery.addresses.step.4.note",
+        "ref": "stapel_delivery.views.AddressDetailView.delete",
+        "endpoints": [
+          {
+            "method": "DELETE",
+            "path": "/delivery/api/v1/addresses/<int:address_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 5,
+        "note": "Pick the default address",
+        "note_key": "flow.delivery.addresses.step.5.note",
+        "ref": "stapel_delivery.views.AddressDefaultView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/delivery/api/v1/addresses/<int:address_id>/default/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 6,
+        "note": "Open one address",
+        "note_key": "flow.delivery.addresses.step.6.note",
+        "ref": "stapel_delivery.views.AddressDetailView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/addresses/<int:address_id>/"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "delivery.choose",
+    "title": "Choose how an order is delivered",
+    "title_key": "flow.delivery.choose.title",
+    "description": "At checkout the buyer picks a saved address (or types one), sees the delivery methods with their prices for this cart, and picks one or a pickup point. Orders asks the delivery.quote adjuster for the shipping line and the delivery checkout hook keeps the address for the shipment.",
+    "description_key": "flow.delivery.choose.description",
+    "actors": [
+      "Buyer (guests type the address inline)"
+    ],
+    "steps": [
+      {
+        "kind": "human",
+        "order": 0,
+        "note": "The buyer opens checkout with a cart",
+        "note_key": "flow.delivery.choose.step.0.note",
+        "ref": ""
+      },
+      {
+        "kind": "http",
+        "order": 1,
+        "note": "See which delivery methods the shop offers",
+        "note_key": "flow.delivery.choose.step.1.note",
+        "ref": "stapel_delivery.views.MethodListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/methods/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 2,
+        "note": "Price every method for this cart and address",
+        "note_key": "flow.delivery.choose.step.2.note",
+        "ref": "stapel_delivery.views.OptionsView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/delivery/api/v1/options/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 3,
+        "note": "Pick a pickup point",
+        "note_key": "flow.delivery.choose.step.3.note",
+        "ref": "stapel_delivery.views.PickupPointListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/pickup-points/"
+          }
+        ]
+      },
+      {
+        "kind": "action",
+        "order": 5,
+        "note": "The order is placed; its shipment is created",
+        "note_key": "flow.delivery.choose.step.5.note",
+        "ref": "orders.order.placed"
+      }
+    ]
+  },
+  {
+    "id": "delivery.fulfil",
+    "title": "Ship orders",
+    "title_key": "flow.delivery.fulfil.title",
+    "description": "Staff work through pending shipments, record the carrier's tracking number, and move each one to packed, shipped and delivered (or cancelled / returned). A polling carrier advances them by itself.",
+    "description_key": "flow.delivery.fulfil.description",
+    "actors": [
+      "Staff",
+      "Carrier"
+    ],
+    "steps": [
+      {
+        "kind": "http",
+        "order": 1,
+        "note": "Work through pending shipments",
+        "note_key": "flow.delivery.fulfil.step.1.note",
+        "ref": "stapel_delivery.views.StaffShipmentListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/staff/shipments/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 2,
+        "note": "Record the tracking number",
+        "note_key": "flow.delivery.fulfil.step.2.note",
+        "ref": "stapel_delivery.views.StaffShipmentTrackingView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/delivery/api/v1/staff/shipments/<int:shipment_id>/tracking/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 3,
+        "note": "Mark packed, shipped, delivered, returned or cancelled",
+        "note_key": "flow.delivery.fulfil.step.3.note",
+        "ref": "stapel_delivery.views.StaffShipmentTransitionView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/delivery/api/v1/staff/shipments/<int:shipment_id>/transition/"
+          }
+        ]
+      },
+      {
+        "kind": "action",
+        "order": 4,
+        "note": "Every status move is announced",
+        "note_key": "flow.delivery.fulfil.step.4.note",
+        "ref": "delivery.shipment.status_changed"
+      }
+    ]
+  },
+  {
+    "id": "delivery.track",
+    "title": "Track my parcel",
+    "title_key": "flow.delivery.track.title",
+    "description": "The buyer pages through their shipments and opens one to see its status, tracking number and link, and the timeline of steps.",
+    "description_key": "flow.delivery.track.description",
+    "actors": [
+      "Buyer"
+    ],
+    "steps": [
+      {
+        "kind": "action",
+        "order": 0,
+        "note": "A step is announced to the buyer",
+        "note_key": "flow.delivery.track.step.0.note",
+        "ref": "delivery.shipment.status_changed"
+      },
+      {
+        "kind": "http",
+        "order": 1,
+        "note": "Page through my shipments",
+        "note_key": "flow.delivery.track.step.1.note",
+        "ref": "stapel_delivery.views.ShipmentListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/shipments/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 2,
+        "note": "Open one shipment and its timeline",
+        "note_key": "flow.delivery.track.step.2.note",
+        "ref": "stapel_delivery.views.ShipmentDetailView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/delivery/api/v1/shipments/<int:shipment_id>/"
+          }
+        ]
+      }
+    ]
+  }
+]

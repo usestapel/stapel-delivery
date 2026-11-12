@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "orders.order.status_changed",
+  "description": "Consumed from stapel-orders: an order changed status. Delivery reacts to to == 'cancelled' by cancelling a shipment that has not left. Tolerant reader.",
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "to"
+  ],
+  "additionalProperties": true
+}

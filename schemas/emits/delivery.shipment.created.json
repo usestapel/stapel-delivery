@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "delivery.shipment.created",
+  "description": "A shipment was created for a placed order. Key = shipment id. No recipient fields.",
+  "type": "object",
+  "properties": {
+    "shipment_id": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string"
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "courier",
+        "pickup",
+        "digital"
+      ]
+    },
+    "carrier": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "packed",
+        "shipped",
+        "delivered",
+        "returned",
+        "cancelled"
+      ]
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    }
+  },
+  "required": [
+    "shipment_id",
+    "number",
+    "order_id",
+    "user_id",
+    "method",
+    "kind",
+    "carrier",
+    "status",
+    "amount",
+    "currency"
+  ],
+  "additionalProperties": false
+}

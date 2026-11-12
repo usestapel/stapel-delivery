@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "delivery.reserve",
+  "description": "Orders checkout hook, reserve. Payload: the adjuster request plus attempt_key. Validates the delivery choice exactly like delivery.quote and stores it (with the recipient snapshot) under attempt_key. Output: {ok: bool, token: string|null, errors: [...]}. Idempotent; reserves anew after a release.",
+  "type": "object",
+  "properties": {
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "subtotal": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "purchasable_type": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "purchasable_key": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "line_total": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "attrs": {
+            "type": "object",
+            "description": "The purchasable resolver's extra scalar fields; delivery reads weight_grams (integer grams) and shippable (false = not shipped)."
+          }
+        },
+        "required": [
+          "quantity"
+        ],
+        "additionalProperties": true
+      },
+      "maxItems": 100
+    },
+    "adjustments_so_far": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Earlier adjusters' adjustments; meta.free_shipping=true (optionally narrowed by meta.free_shipping_methods) makes shipping free."
+      }
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "delivery": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "address": {
+              "type": "object",
+              "description": "Inline recipient address (validated by delivery: name<=120, phone<=32, line1/line2<=200, city<=100, region<=100, postal_code<=20, country ISO alpha-2).",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                },
+                "line1": {
+                  "type": "string"
+                },
+                "line2": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "region": {
+                  "type": "string"
+                },
+                "postal_code": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                },
+                "latitude": {
+                  "type": [
+                    "string",
+                    "number",
+                    "null"
+                  ]
+                },
+                "longitude": {
+                  "type": [
+                    "string",
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "address_id": {
+              "type": [
+                "integer",
+                "string"
+              ],
+              "description": "An entry of user_id's address book (accounts only)."
+            },
+            "pickup_point": {
+              "type": "string",
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    "attempt_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "The orders checkout idempotency key (lowercase hyphenated UUID)."
+    }
+  },
+  "required": [
+    "currency",
+    "subtotal",
+    "lines",
+    "attempt_key"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,188 @@
+{
+  "module": "stapel-delivery",
+  "version": "0.1.0",
+  "provides": "Delivery methods (courier, pickup point, digital), zones matched by country / region / postcode prefix, rates (flat, free above a subtotal, per kilogram when cart lines carry attrs.weight_grams), pickup points with hours and coordinates, a per-user address book with one default, and shipments with a table FSM (pending, packed, shipped, delivered, returned, cancelled), a timeline, tracking number and link. It is the stapel-orders shipping adjuster (delivery.quote, kind shipping, order 200; honours a promotion's meta.free_shipping marker) and a checkout hook (delivery.reserve keeps the validated choice and the address snapshot under the checkout attempt key; commit creates the order's shipment; release on cancel cancels it). Carriers are a strategy registry: manual by default, an auto-advancing mock for prototypes, a documented Carrier ABC for real ones.",
+  "axes": [
+    {
+      "key": "REQUIRE_METHOD",
+      "kind": "bool",
+      "default": true,
+      "group": "delivery.checkout",
+      "gates": {
+        "operations": [],
+        "co_gates": [],
+        "behavior": "true: delivery.quote answers error.400.delivery_method_required when context.delivery is missing; false: it answers no adjustment."
+      },
+      "curated": {
+        "summary": "true (default): a checkout without a delivery choice is refused with error.400.delivery_method_required (unless nothing in the cart ships). false: such a checkout simply has no shipping line and no shipment. Values: true, false.",
+        "business_label": "Delivery must be chosen"
+      }
+    },
+    {
+      "key": "DEFAULT_CARRIER",
+      "kind": "enum",
+      "default": "manual",
+      "group": "delivery.carrier",
+      "gates": {
+        "operations": [],
+        "co_gates": [],
+        "behavior": "manual: shipments move only by staff (or a carrier webhook); mock: the beat advances pending -> packed -> shipped -> delivered every MOCK_STEP_MINUTES (system check E002 outside the prototype posture stage)."
+      },
+      "curated": {
+        "summary": "manual (default): staff record the tracking number and move each shipment. mock: shipments advance to delivered by themselves every few minutes, for demos and prototypes only. A real carrier registers its own name. Values: manual, mock.",
+        "business_label": "Who moves parcels"
+      }
+    }
+  ],
+  "extension_points": [
+    {
+      "name": "CARRIERS",
+      "kind": "merge_registry",
+      "summary": "Carrier strategies by slug: {slug: 'dotted.path.Carrier' | None} merged over the built-ins manual and mock (or register_carrier at runtime). A Carrier registers a parcel (tracking number), polls status updates from the beat and renders a tracking link; a push-style carrier's webhook calls services.shipments.apply_carrier_update."
+    },
+    {
+      "name": "DEFAULT_CARRIER",
+      "kind": "strategy",
+      "summary": "The carrier a method without its own carrier uses: manual (default), mock (prototype posture only, check E002/W002) or a registered slug / dotted path."
+    },
+    {
+      "name": "GEOCODE_FUNCTION",
+      "kind": "setting",
+      "summary": "A comm Function with the geo.geocode contract that fills missing coordinates of a saved address after commit, best-effort; empty = off."
+    },
+    {
+      "name": "STAPEL_DELIVERY_ADDRESS_PRESENTER / STAPEL_DELIVERY_METHOD_PRESENTER / STAPEL_DELIVERY_OPTIONS_PRESENTER / STAPEL_DELIVERY_PICKUP_POINT_PRESENTER / STAPEL_DELIVERY_SHIPMENT_PRESENTER",
+      "kind": "presenter",
+      "summary": "Swap keys (STAPEL_SWAP) for every response presenter, so a host changes what the API shows without forking a view."
+    },
+    {
+      "name": "delivery.quote",
+      "kind": "comm_function",
+      "summary": "The orders shipping adjuster: reads context.delivery {method, address | address_id | pickup_point}, answers one shipping adjustment (0.00 when free) or a refusal error key; no personal data in meta."
+    },
+    {
+      "name": "delivery.reserve / delivery.commit / delivery.release",
+      "kind": "comm_function",
+      "summary": "The orders checkout hook: reserve stores the choice and the address snapshot under the attempt key; commit binds it to the order and creates the shipment; release drops it, or on an order cancel cancels a shipment that has not left. Idempotent on the attempt key."
+    },
+    {
+      "name": "delivery.options",
+      "kind": "comm_function",
+      "summary": "Every enabled method with its price for a cart and a destination (country is enough), with the reason a method is not offered."
+    },
+    {
+      "name": "delivery.shipment.status",
+      "kind": "comm_function",
+      "summary": "A shipment's status and tracking for another service, by order_id or shipment_id; no recipient fields."
+    },
+    {
+      "name": "delivery.shipment.created",
+      "kind": "comm_event",
+      "summary": "A placed order got its shipment: ids, method, carrier, status, shipping amount; never the recipient."
+    },
+    {
+      "name": "delivery.shipment.status_changed",
+      "kind": "comm_event",
+      "summary": "Every shipment move with the actor (staff, carrier, system) and the tracking number; feeds the buyer notification."
+    },
+    {
+      "name": "orders.order.placed",
+      "kind": "comm_event",
+      "summary": "Consumed: creates the order's shipment from the checkout intent when the commit hook has not already done it."
+    },
+    {
+      "name": "orders.order.status_changed",
+      "kind": "comm_event",
+      "summary": "Consumed: an order moved to cancelled cancels its pending or packed shipment."
+    }
+  ],
+  "surface": [
+    {
+      "name": "carrier_by_slug",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.carrier_by_slug",
+      "intent": "A shipment's carrier for polling and links; an unregistered slug falls back to manual instead of failing the beat."
+    },
+    {
+      "name": "carrier_for_method",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.carrier_for_method",
+      "intent": "A method's own carrier, or the default — what a new shipment of that method gets."
+    },
+    {
+      "name": "carrier_names",
+      "kind": "predicate",
+      "path": "stapel_delivery.carriers.carrier_names",
+      "intent": "The slugs a method and DEFAULT_CARRIER accept (built-ins <- settings <- runtime); also the environment vocabulary."
+    },
+    {
+      "name": "default_carrier",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.default_carrier",
+      "intent": "The carrier this deployment uses for methods without their own (delivery_settings.DEFAULT_CARRIER)."
+    },
+    {
+      "name": "get_carrier",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.get_carrier",
+      "intent": "The carrier registered under a slug; ImproperlyConfigured when unknown."
+    },
+    {
+      "name": "register_carrier",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.register_carrier",
+      "intent": "Register (or with None remove) a carrier class under a slug from an AppConfig.ready(); methods and DEFAULT_CARRIER may then name it. The settings twin is STAPEL_DELIVERY['CARRIERS']."
+    },
+    {
+      "name": "reset_carriers",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.reset_carriers",
+      "intent": "Drop runtime carrier registrations — a test lever."
+    },
+    {
+      "name": "resolve_carrier",
+      "kind": "factory",
+      "path": "stapel_delivery.carriers.resolve_carrier",
+      "intent": "Turn a DEFAULT_CARRIER value (slug or dotted path) into a carrier; the AppSettings resolver for the key."
+    },
+    {
+      "name": "uses_mock",
+      "kind": "predicate",
+      "path": "stapel_delivery.carriers.uses_mock",
+      "intent": "Where the mock carrier is in use (DEFAULT_CARRIER, and with methods=True the method codes); what the posture checks E002/W002 read."
+    }
+  ],
+  "operations_total": 14,
+  "requires": [
+    {
+      "module": "stapel-core",
+      "optional": false,
+      "reason": "comm bus (delivery.* Functions and emits, orders.* and user.merged consumers), AnchorPagination, GDPR owner protocol, posture stage, AppSettings"
+    },
+    {
+      "module": "stapel-orders",
+      "optional": true,
+      "reason": "calls delivery.quote as its shipping adjuster and delivery.reserve/commit/release as a checkout hook (preset.SETTINGS_DEFAULTS), and emits orders.order.placed / status_changed that create and cancel shipments"
+    },
+    {
+      "module": "stapel-auth",
+      "optional": true,
+      "reason": "addresses and shipments are keyed on request.user; user.merged moves a guest's book and shipments to the account on sign-in"
+    },
+    {
+      "module": "stapel-geo",
+      "optional": true,
+      "reason": "GEOCODE_FUNCTION = 'geo.geocode' fills coordinates of saved addresses, by Function name only"
+    },
+    {
+      "module": "stapel-promotions",
+      "optional": true,
+      "reason": "a free-shipping promotion marks its adjustment meta.free_shipping, which delivery.quote honours"
+    },
+    {
+      "module": "stapel-notifications",
+      "optional": true,
+      "reason": "delivers delivery.shipment_status_changed to the buyer"
+    }
+  ]
+}

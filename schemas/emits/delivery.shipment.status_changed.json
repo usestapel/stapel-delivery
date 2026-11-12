@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "delivery.shipment.status_changed",
+  "description": "A shipment moved along its lifecycle. Key = shipment id. Feeds the buyer notification delivery.shipment_status_changed. No recipient fields.",
+  "type": "object",
+  "properties": {
+    "shipment_id": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string"
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "from": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "packed",
+        "shipped",
+        "delivered",
+        "returned",
+        "cancelled"
+      ]
+    },
+    "to": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "packed",
+        "shipped",
+        "delivered",
+        "returned",
+        "cancelled"
+      ]
+    },
+    "actor": {
+      "type": "string",
+      "enum": [
+        "staff",
+        "carrier",
+        "system"
+      ]
+    },
+    "carrier": {
+      "type": "string"
+    },
+    "tracking_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "shipment_id",
+    "number",
+    "order_id",
+    "user_id",
+    "from",
+    "to",
+    "actor",
+    "carrier",
+    "tracking_number"
+  ],
+  "additionalProperties": false
+}
