@@ -141,7 +141,8 @@ zone, weight_basis, free_reason?, pickup_point?}}` — a free delivery still
 answers `"0.00"` so the order records the method.
 
 The request follows orders' CONTRACT-DELTAS: `user_id` is null for a guest
-(a guest has no book, so the address must be inline), `adjustments_so_far`
+(a guest has no book, so the address must be inline; `address_id` reads the
+book of `user_id` only), `adjustments_so_far`
 items carry `"adjuster"`, an adjustment `code` is ≤64 and `meta` is kept
 past GDPR erasure — so `meta` never carries the address.
 
@@ -167,13 +168,25 @@ Checkout hooks `delivery.reserve` / `.commit` / `.release` (entry order 200):
   idempotent. `tests/test_release_semantics.py` is the full (state, event)
   table.
 
+**Ownership (`actor_id`).** Orders sends `actor_id` — the acting account
+id, a guest's own id included, always present — next to `user_id` (null for
+a guest on every payload, commit and `orders.order.placed` included).
+Intents and shipments are owned by `actor_id` when the payload has it
+(stored in their `user_id` column, so the buyer's `shipments/`,
+`user.merged` and GDPR export/erase find a guest's rows by the guest id);
+payloads without it fall back to `user_id` (and, at commit/placed, fill a
+blank owner from it).
+
 `orders.order.placed` → one shipment per order (a fallback for the commit
-hook, and the source of the buyer id for a guest and of the order lines).
+hook, and the source of the order lines; of the buyer id for a guest when
+the payload predates `actor_id`).
 The intent is found by, in order: `attempt_key` in the event (if orders adds it), the intent a commit
 already linked to that `order_id`, then the oldest `reserved` intent of the
 same `user_id` whose **lines fingerprint** (currency + sorted
 `(type, key, quantity, unit_price)`) equals the event's (a guest intent has
-a blank user and matches any user with the same fingerprint). No intent → no
+a blank user and matches any user with the same fingerprint). The
+fingerprint step runs only for events without `actor_id`: an orders that
+names the actor also sends `attempt_key`. No intent → no
 shipment, logged at INFO (an order placed without delivery). A `digital`
 intent or an all-unshippable cart creates no shipment.
 `orders.order.status_changed` to `cancelled` cancels a `pending`/`packed`

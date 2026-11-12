@@ -30,6 +30,12 @@ shipments with tracking, wired into the orders checkout by name.
   (cancels the shipment) — `checkout_failed` / `orphaned` on a committed
   intent answer ok and change nothing, and a commit after such a release
   still ships. Idempotent; reserve after release reserves anew.
+- **Ownership by `actor_id`**: the hook payloads and `orders.order.placed`
+  may carry `actor_id` (the acting account, a guest's own id too) next to
+  `user_id` (null for a guest); intents and shipments are owned by it when
+  present, so a guest's rows are found, merged and erased by the guest id;
+  the lines-fingerprint fallback runs only for payloads without it. GDPR
+  export includes the checkout intents.
 - **Shipments**: one per order (unique), FSM pending → packed → shipped →
   delivered / returned / cancelled with a timeline, tracking number,
   carrier slug and URL; buyer `shipments/` (anchor-paginated, own rows

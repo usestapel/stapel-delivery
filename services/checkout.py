@@ -2,10 +2,12 @@
 
 Payload shapes are the wave contract (SPEC-BRICKS-WAVE-2026-11-12 §2) as
 built by stapel-orders (its CONTRACT-DELTAS): the adjuster request
-``{currency, subtotal, user_id|null, lines, adjustments_so_far, context}``;
-reserve = that plus ``attempt_key``; commit ``{attempt_key, token|null,
-order_id, user_id|null}``; release ``{attempt_key, token|null,
-order_id|null, reason}``. Orders is never imported.
+``{currency, subtotal, user_id|null, actor_id?, lines, adjustments_so_far,
+context}``; reserve = that plus ``attempt_key``; commit ``{attempt_key,
+token|null, order_id, user_id|null, actor_id?}``; release ``{attempt_key,
+token|null, order_id|null, reason}``. ``user_id`` is null for a guest;
+``actor_id`` (the guest's own id, or the account) owns intents and
+shipments when present (:func:`owner_of`). Orders is never imported.
 
 The address snapshot never rides an adjustment's ``meta`` (orders keeps
 meta past GDPR erasure): reserve stores it in a ``DeliveryIntent`` keyed on
@@ -265,6 +267,15 @@ def lines_fingerprint(currency: str, lines: list[dict]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def owner_of(payload: dict) -> str:
+    """Who owns this checkout's rows: ``actor_id`` (a guest's own id too), else ``user_id``.
+
+    Orders sends ``actor_id`` next to ``user_id`` (null for a guest); payloads
+    of an orders that predates it carry ``user_id`` only.
+    """
+    return str(payload.get("actor_id") or payload.get("user_id") or "")
+
+
 def _token(intent: DeliveryIntent) -> str:
     return f"dl-{intent.pk}"
 
@@ -279,7 +290,7 @@ def reserve(request: dict) -> dict:
         return {"ok": True, "token": None, "errors": []}
     c = result.choice
     fields = dict(
-        user_id=str(request.get("user_id") or ""),
+        user_id=owner_of(request),
         status=IntentStatus.RESERVED,
         method_code=c.method.code,
         method_name=c.method.name,
@@ -321,8 +332,9 @@ def commit(payload: dict) -> dict:
     intent = DeliveryIntent.objects.filter(attempt_key=attempt_key).first()
     if intent is None or not order_id:
         return {"ok": True}
-    if not intent.user_id and payload.get("user_id"):
-        DeliveryIntent.objects.filter(pk=intent.pk, user_id="").update(user_id=str(payload["user_id"]))
+    owner = owner_of(payload)
+    if not intent.user_id and owner:
+        DeliveryIntent.objects.filter(pk=intent.pk, user_id="").update(user_id=owner)
     shipment_service.link_and_create(intent.pk, order_id, [])
     return {"ok": True}
 
@@ -370,6 +382,9 @@ def _find_intent(payload: dict, now: dt.datetime) -> DeliveryIntent | None:
     intent = DeliveryIntent.objects.filter(order_id=order_id).first()
     if intent is not None:
         return intent
+    if payload.get("actor_id"):
+        # An orders that names the actor also sends attempt_key: no guessing.
+        return None
     from ..conf import delivery_settings
 
     horizon = now - dt.timedelta(hours=int(delivery_settings.INTENT_TTL_HOURS))
@@ -388,7 +403,7 @@ def order_placed(payload: dict, now: dt.datetime | None = None) -> str:
     """``orders.order.placed`` → the order's shipment. Returns what happened."""
     now = now or timezone.now()
     order_id = str(payload["order_id"])
-    user_id = str(payload.get("user_id") or "")
+    user_id = owner_of(payload)
     shipment = Shipment.objects.filter(order_id=order_id).first()
     if shipment is None:
         intent = _find_intent(payload, now)
@@ -423,7 +438,7 @@ def order_status_changed(payload: dict) -> str:
 
 
 __all__ = [
-    "evaluate", "commit", "lines_fingerprint", "options", "order_placed", "order_status_changed",
+    "evaluate", "commit", "owner_of", "lines_fingerprint", "options", "order_placed", "order_status_changed",
     "quote", "release", "reserve",
 ]
 

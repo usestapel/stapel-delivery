@@ -1,5 +1,9 @@
 """GDPR for stapel-delivery — the ledger rule: the person goes, the economics stay.
 
+Rows are keyed by the owning account id: ``actor_id`` of the orders
+payloads (a guest's own id too), ``user_id`` for older payloads — so a
+guest's intents and shipments are found by the guest's id.
+
 Erasure of an ``account``:
 
 - the address book and the checkout intents are deleted (they carry no
@@ -45,16 +49,26 @@ def _shipment_row(s) -> dict:
     }
 
 
+def _intent_row(i) -> dict:
+    return {
+        "status": i.status, "order_id": i.order_id, "method": i.method_name,
+        "recipient": i.recipient, "pickup_point": i.pickup_point,
+        "amount": str(i.amount), "currency": i.currency, "created_at": i.created_at.isoformat(),
+    }
+
+
 class DeliveryGDPRProvider(GDPRProvider):
     section = "delivery"
 
     def export(self, user_id) -> dict:
-        from .models import Address, Shipment
+        from .models import Address, DeliveryIntent, Shipment
 
         user_id = str(user_id)
         return {
             "addresses": [_address_row(a) for a in Address.objects.filter(user_id=user_id).order_by("id")],
             "shipments": [_shipment_row(s) for s in Shipment.objects.filter(user_id=user_id).order_by("id")],
+            "checkout_intents": [_intent_row(i) for i in
+                                 DeliveryIntent.objects.filter(user_id=user_id).order_by("id")],
         }
 
     def delete(self, user_id) -> None:

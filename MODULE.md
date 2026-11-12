@@ -53,7 +53,12 @@ the fragment is missing).
 
 `context.delivery = {"method": code, "address": {...} | "address_id": id |
 "pickup_point": code}`. A guest (`user_id` null) must send the address
-inline. Validation is `AddressSnapshotSerializer` (the same rules as the
+inline (`address_id` reads the book of `user_id` only).
+
+Ownership: the payloads' `actor_id` (the acting account, a guest's own id
+too) owns intents and shipments when present; without it, `user_id`. A
+guest's shipments are therefore listed, merged (`user.merged`) and
+exported/erased by the guest id. Validation is `AddressSnapshotSerializer` (the same rules as the
 book). Errors come back as `{"code": "error.<4xx>.<slug>", "field":
 "delivery.<…>", "params"}`.
 
