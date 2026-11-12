@@ -173,3 +173,23 @@ def test_the_request_schema_refuses_a_malformed_call(catalog):
     bad["currency"] = "usd"
     with pytest.raises((CommError, jsonschema.ValidationError, ValueError)):
         call("delivery.quote", bad)
+
+
+class TestAdjustmentCodeIsTheMethod:
+    """Orders copies the shipping adjustment's ``code`` into ``Order.shipping_method``."""
+
+    @pytest.mark.parametrize("delivery", [
+        {"method": "courier", "address": HOME},
+        {"method": "pickup", "pickup_point": "pp-1"},
+    ])
+    def test_code_is_the_method_code_and_carries_no_address(self, catalog, delivery):
+        [adj] = quote(order_request(delivery=delivery))["adjustments"]
+        assert adj["code"] == delivery["method"] and len(adj["code"]) <= 64
+        wire = json.dumps({k: adj[k] for k in ("code", "label", "meta")})
+        for personal in (HOME["name"], HOME["phone"], HOME["line1"], HOME["postal_code"]):
+            assert personal not in wire
+
+    def test_method_codes_fit_the_order_field(self):
+        from stapel_delivery.models import DeliveryMethod
+
+        assert DeliveryMethod._meta.get_field("code").max_length <= 64
