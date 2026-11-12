@@ -7,6 +7,28 @@ error envelope the tests assert is the one a host serves.
 """
 from __future__ import annotations
 
+import os
+from urllib.parse import urlsplit
+
+#: A ``postgresql://user:password@host:port/db`` URL runs the suite on
+#: Postgres (real row locks); unset, an in-memory SQLite.
+TEST_DATABASE_ENV = "STAPEL_TEST_DATABASE_URL"
+
+
+def _database() -> dict:
+    url = os.environ.get(TEST_DATABASE_ENV, "")
+    if not url:
+        return {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
+    parts = urlsplit(url)
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": parts.path.lstrip("/"),
+        "USER": parts.username or "",
+        "PASSWORD": parts.password or "",
+        "HOST": parts.hostname or "",
+        "PORT": str(parts.port or ""),
+    }
+
 
 def settings_kwargs(
     *,
@@ -47,7 +69,7 @@ def settings_kwargs(
             "stapel_delivery",
         ],
         AUTH_USER_MODEL="users.User",
-        DATABASES={"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}},
+        DATABASES={"default": _database()},
         DEFAULT_AUTO_FIELD="django.db.models.BigAutoField",
         USE_TZ=True,
         ROOT_URLCONF=root_urlconf,
@@ -73,7 +95,9 @@ def settings_kwargs(
             "django.contrib.auth.middleware.AuthenticationMiddleware",
             "django.contrib.messages.middleware.MessageMiddleware",
         ],
-        MIGRATION_MODULES={"users": None},
+        # SQLite builds the users table without its migrations; Postgres
+        # enforces the auth foreign keys, so it runs them.
+        MIGRATION_MODULES={} if os.environ.get(TEST_DATABASE_ENV) else {"users": None},
         REST_FRAMEWORK=rest_framework,
     )
 
