@@ -175,8 +175,10 @@ Checkout hooks `delivery.reserve` / `.commit` / `.release` (entry order 200):
   table.
 
 **Ownership (`actor_id`).** Orders sends `actor_id` — the acting account
-id, a guest's own id included, always present — next to `user_id` (null for
-a guest on every payload, commit and `orders.order.placed` included).
+id, a guest's own id included, always present — next to `user_id`. On the
+adjuster and hook payloads (quote / reserve / commit / release) `user_id` is
+null for a guest; on the `orders.order.placed` fact `user_id` stays the
+acting account id (as released consumers expect) and `actor_id` repeats it.
 Intents and shipments are owned by `actor_id` when the payload has it
 (stored in their `user_id` column, so the buyer's `shipments/`,
 `user.merged` and GDPR export/erase find a guest's rows by the guest id);

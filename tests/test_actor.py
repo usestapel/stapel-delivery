@@ -1,7 +1,8 @@
 """``actor_id``: who owns a checkout's intent and shipment, a guest included.
 
 Orders sends ``actor_id`` (always present: the guest's own id or the
-account) next to ``user_id`` (null for a guest on every payload). Rows are
+account) next to ``user_id`` (null for a guest on the adjuster and hook payloads; the
+``orders.order.placed`` fact keeps ``user_id`` = the acting account). Rows are
 keyed by ``actor_id`` when present; payloads without it keep today's
 behaviour (``user_id``, the lines-fingerprint fallback for the placed fact).
 """
@@ -40,7 +41,7 @@ def test_a_guest_owns_the_intent_and_the_shipment_from_reserve(catalog, guest, c
 def test_the_placed_fact_names_the_guest_by_actor_id(catalog, guest):
     req = guest_checkout(guest)
     call("delivery.reserve", req)
-    event = {**placed_event("802", req), "user_id": None, "actor_id": str(guest.pk),
+    event = {**placed_event("802", req, user_id=guest.pk), "actor_id": str(guest.pk),
              "attempt_key": req["attempt_key"]}
     with mutate_and_emit():
         emit("orders.order.placed", event, key="802")
@@ -50,7 +51,7 @@ def test_the_placed_fact_names_the_guest_by_actor_id(catalog, guest):
 def test_no_fingerprint_guess_when_the_payload_names_the_actor(catalog, guest):
     req = guest_checkout(guest)
     call("delivery.reserve", req)
-    event = {**placed_event("803", req), "user_id": None, "actor_id": str(guest.pk)}
+    event = {**placed_event("803", req, user_id=guest.pk), "actor_id": str(guest.pk)}
     assert checkout.order_placed(event) == "no_intent"
 
 
