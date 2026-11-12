@@ -19,6 +19,9 @@ A scaffolded project adds ``"stapel_delivery.preset"`` to its
 tested by ``tests/test_readme_wiring.py``); system check
 ``stapel_delivery.W003`` says when the fragment is missing.
 
+Checkout hooks reserve in an explicit order — inventory 50 (stock first),
+promotions 100, delivery 200 — and release in reverse.
+
 Shipping runs at order 200: after discounts (100), so a promotion's
 free-shipping marker is in ``adjustments_so_far``, and before tax (300).
 """

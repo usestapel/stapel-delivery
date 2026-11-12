@@ -12,6 +12,8 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- Explicit checkout hook order (`preset.py`): inventory 50 (stock first),
+  promotions 100, delivery 200 — never a tie broken by name.
 - README wiring snippets in the merge forms (the scaffold's
   `_stapel_merge_preset_defaults` list, or a per-key hand merge); pasting
   them never drops the host's `STAPEL_ORDERS` keys — executed against a

@@ -44,7 +44,9 @@
 
 `preset.SETTINGS_DEFAULTS["STAPEL_ORDERS"]` registers the adjuster
 (`{"delivery": {"quote": "delivery.quote", "order": 200}}`) and the hook
-(`{"delivery": {"reserve", "commit", "release", "order": 200}}`). The
+(`{"delivery": {"reserve", "commit", "release", "order": 200}}`). Hook
+order is explicit: inventory 50 (stock first), promotions 100, delivery 200;
+orders reserves ascending and releases in reverse. The
 stapel-tools scaffold merges presets of composites only today, so a host
 pastes it (check `stapel_delivery.W003` fires when orders is installed and
 the fragment is missing).
