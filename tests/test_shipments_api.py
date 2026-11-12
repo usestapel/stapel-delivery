@@ -5,6 +5,7 @@ from stapel_core.comm import call
 from stapel_delivery.models import Shipment
 
 from .factories import HOME, reserve_request
+from .shipping import make_shipment
 
 pytestmark = pytest.mark.django_db
 V1 = "/delivery/api/v1"
@@ -96,3 +97,22 @@ def test_status_function(user, catalog):
     assert call("delivery.shipment.status", {"shipment_id": s.pk})["status"] == "pending"
     assert call("delivery.shipment.status", {"order_id": "none"}) == {"found": False}
     assert "line1" not in by_order
+
+
+class TestAllowedTransitions:
+    """The UI reads what the caller may do now instead of mirroring the FSM table."""
+
+    def test_staff_sees_the_fsm_targets_of_the_current_status(self, catalog, client_for, staff, user):
+        c = client_for(staff)
+        shipment = make_shipment(user.pk, order_id="t1")
+        assert c.get(f"{V1}/staff/shipments/").json()["items"][0]["allowed_transitions"] == [
+            "packed", "shipped", "cancelled"]
+        moved = c.post(f"{V1}/staff/shipments/{shipment.pk}/transition/", {"to": "shipped"}, format="json")
+        assert moved.json()["allowed_transitions"] == ["delivered", "returned"]
+        moved = c.post(f"{V1}/staff/shipments/{shipment.pk}/transition/", {"to": "returned"}, format="json")
+        assert moved.json()["allowed_transitions"] == []
+
+    def test_a_buyer_may_move_nothing(self, catalog, auth_client, user):
+        shipment = make_shipment(user.pk, order_id="t2")
+        assert auth_client.get(f"{V1}/shipments/{shipment.pk}/").json()["allowed_transitions"] == []
+        assert auth_client.get(f"{V1}/shipments/").json()["items"][0]["allowed_transitions"] == []

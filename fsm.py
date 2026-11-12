@@ -43,6 +43,13 @@ def check(from_status: str, to_status: str, actor: str) -> None:
         raise TransitionInvalid(f"{from_status} -> {to_status} by {actor}")
 
 
+def targets_for(status: str, actor: str | None) -> list[str]:
+    """Statuses ``actor`` may move a shipment in ``status`` to now (wire order); none for a buyer."""
+    if actor is None:
+        return []
+    return [to for to in STAFF_TARGETS if allowed(status, to, actor)]
+
+
 def next_forward(status: str) -> str | None:
     """The happy-path successor (what the demo carrier advances to)."""
     return {S.PENDING: S.PACKED, S.PACKED: S.SHIPPED, S.SHIPPED: S.DELIVERED}.get(status)

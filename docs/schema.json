@@ -1665,9 +1665,17 @@
               "$ref": "#/components/schemas/ShipmentEvent"
             },
             "description": "Timeline, oldest first."
+          },
+          "allowed_transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentTransitionTargetEnum"
+            },
+            "description": "Statuses the caller may move this shipment to now (the FSM table and the caller's role); empty for a buyer."
           }
         },
         "required": [
+          "allowed_transitions",
           "amount",
           "carrier",
           "created_at",

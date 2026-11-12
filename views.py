@@ -8,6 +8,8 @@ session (a guest who checked out tracks its parcel). Both are scoped to
 ``request.user``: a foreign id is a 404 like an absent one, with no staff
 bypass. Staff views require ``is_staff``.
 """
+import dataclasses
+
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import permissions
 from stapel_core.django.api.errors import StapelErrorResponse, StapelResponse
@@ -20,6 +22,7 @@ from stapel_core.django.api.permissions import (
 from stapel_core.django.api.views import StapelAPIView
 from stapel_core.flows import flow_step
 
+from . import fsm
 from .flows import ADDRESSES, CHOOSE, FULFIL, TRACK
 from .models import DeliveryMethod, PickupPoint, ShipmentStatus
 from .pagination import PickupPointAnchorPagination, ShipmentAnchorPagination
@@ -63,8 +66,15 @@ class _DeliveryView(StapelAPIView):
     def _user_id(self, request) -> str:
         return str(request.user.pk)
 
+    #: The FSM actor of this view's caller (``None``: a buyer, who moves nothing).
+    fsm_actor: str | None = None
+
+    def _present_shipment(self, shipment):
+        dto = get_shipment_presenter()().present(shipment)
+        return dataclasses.replace(dto, allowed_transitions=fsm.targets_for(dto.status, self.fsm_actor))
+
     def _shipment(self, shipment):
-        return self.serialized_response(get_shipment_presenter()().present(shipment))
+        return self.serialized_response(self._present_shipment(shipment))
 
     def _page(self, request, qs, paginator_class, present, serializer_class):
         paginator = paginator_class()
@@ -277,7 +287,7 @@ class ShipmentListView(_DeliveryView):
         qs = shipment_service.for_user(self._user_id(request), request.query_params.getlist("status"),
                                        request.query_params.get("order_id"))
         return self._page(request, qs.prefetch_related("events"), self.pagination_class,
-                          get_shipment_presenter()().present, ShipmentResponseSerializer)
+                          self._present_shipment, ShipmentResponseSerializer)
 
 
 @extend_schema(tags=TAGS)
@@ -301,6 +311,7 @@ class ShipmentDetailView(_DeliveryView):
 class StaffShipmentListView(_DeliveryView):
     """Every shipment, newest first (staff)."""
 
+    fsm_actor = fsm.STAFF
     permission_classes = [IsStaffUser]
     stapel_anonymous_access = ANONYMOUS_DENIED
     pagination_class = ShipmentAnchorPagination
@@ -314,13 +325,14 @@ class StaffShipmentListView(_DeliveryView):
         qs = shipment_service.for_staff(request.query_params.getlist("status"),
                                         request.query_params.get("order_id"))
         return self._page(request, qs.prefetch_related("events"), self.pagination_class,
-                          get_shipment_presenter()().present, ShipmentResponseSerializer)
+                          self._present_shipment, ShipmentResponseSerializer)
 
 
 @extend_schema(tags=TAGS)
 class StaffShipmentTrackingView(_DeliveryView):
     """Record the carrier's tracking number (staff)."""
 
+    fsm_actor = fsm.STAFF
     permission_classes = [IsStaffUser]
     stapel_anonymous_access = ANONYMOUS_DENIED
     request_serializer_class = ShipmentTrackingRequestSerializer
@@ -341,6 +353,7 @@ class StaffShipmentTrackingView(_DeliveryView):
 class StaffShipmentTransitionView(_DeliveryView):
     """Move a shipment along its lifecycle (staff)."""
 
+    fsm_actor = fsm.STAFF
     permission_classes = [IsStaffUser]
     stapel_anonymous_access = ANONYMOUS_DENIED
     request_serializer_class = ShipmentTransitionRequestSerializer

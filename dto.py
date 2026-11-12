@@ -177,3 +177,5 @@ class ShipmentDTO:
     created_at: datetime.datetime
     updated_at: datetime.datetime
     events: list[ShipmentEventDTO] = field(default_factory=list)
+    #: Targets the caller may move the shipment to now (empty for a buyer).
+    allowed_transitions: list[str] = field(default_factory=list)

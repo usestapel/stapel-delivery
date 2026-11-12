@@ -276,6 +276,11 @@ class ShipmentResponseSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(default_timezone=UTC)
     updated_at = serializers.DateTimeField(default_timezone=UTC)
     events = ShipmentEventSerializer(many=True, help_text="Timeline, oldest first.")
+    allowed_transitions = serializers.ListField(
+        child=serializers.ChoiceField(choices=[(s, s) for s in fsm.STAFF_TARGETS]),
+        help_text="Statuses the caller may move this shipment to now (the FSM table and the "
+                  "caller's role); empty for a buyer.",
+    )
 
 
 class ShipmentPageSerializer(_PageSerializer):

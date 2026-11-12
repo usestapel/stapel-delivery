@@ -12,6 +12,9 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- `ShipmentResponse.allowed_transitions`: the statuses the caller may move
+  the shipment to now (FSM table + role; empty for a buyer), so a staff UI
+  never mirrors the state table.
 - Explicit checkout hook order (`preset.py`): inventory 50 (stock first),
   promotions 100, delivery 200 — never a tie broken by name.
 - README wiring snippets in the merge forms (the scaffold's
