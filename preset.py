@@ -1,19 +1,23 @@
 """The settings fragment that wires stapel-delivery into stapel-orders.
 
 Plain data, importable without Django settings. Installing delivery next to
-orders needs exactly this in ``STAPEL_ORDERS`` (merged two levels deep, so a
-host's own adjusters and hooks stay):
+orders needs exactly this in ``STAPEL_ORDERS``, merged two levels deep so
+the host's own keys and other companions' entries stay:
 
-    from stapel_delivery import preset
+    from stapel_delivery.preset import SETTINGS_DEFAULTS as _DELIVERY
+
+    STAPEL_ORDERS = globals().get("STAPEL_ORDERS") or {}
     STAPEL_ORDERS = {
-        **preset.SETTINGS_DEFAULTS["STAPEL_ORDERS"],
-        # ... the host's own keys; for registries merge per key, e.g.
-        # "ADJUSTERS": {**preset.SETTINGS_DEFAULTS["STAPEL_ORDERS"]["ADJUSTERS"], ...}
+        **STAPEL_ORDERS,
+        "ADJUSTERS": {**_DELIVERY["STAPEL_ORDERS"]["ADJUSTERS"], **STAPEL_ORDERS.get("ADJUSTERS", {})},
+        "CHECKOUT_HOOKS": {**_DELIVERY["STAPEL_ORDERS"]["CHECKOUT_HOOKS"],
+                           **STAPEL_ORDERS.get("CHECKOUT_HOOKS", {})},
     }
 
-The stapel-tools scaffold merges ``preset.SETTINGS_DEFAULTS`` for composites;
-for a companion brick like this one a hand-wired host pastes it (system
-check ``stapel_delivery.W003`` says when it is missing).
+A scaffolded project adds ``"stapel_delivery.preset"`` to its
+``_stapel_merge_preset_defaults(globals(), [...])`` list instead (README,
+tested by ``tests/test_readme_wiring.py``); system check
+``stapel_delivery.W003`` says when the fragment is missing.
 
 Shipping runs at order 200: after discounts (100), so a promotion's
 free-shipping marker is in ``adjustments_so_far``, and before tax (300).

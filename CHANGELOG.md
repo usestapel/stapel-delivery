@@ -12,6 +12,10 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- README wiring snippets in the merge forms (the scaffold's
+  `_stapel_merge_preset_defaults` list, or a per-key hand merge); pasting
+  them never drops the host's `STAPEL_ORDERS` keys — executed against a
+  populated settings module by `tests/test_readme_wiring.py`.
 - **Catalog**: `DeliveryMethod` (courier / pickup / digital), `Zone`
   (country / region / postcode-prefix lists, most specific wins), `Rate`
   (flat, free above a subtotal, per kilogram from `attrs.weight_grams` with

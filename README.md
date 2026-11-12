@@ -62,16 +62,37 @@ INSTALLED_APPS = [
 # urls.py
 path("delivery/api/", include("stapel_delivery.urls"))   # -> /delivery/api/v1/...
 
-# settings.py — wire delivery into the orders checkout (merge per key)
-from stapel_delivery import preset
-STAPEL_ORDERS = {
-    "ADJUSTERS": {**preset.SETTINGS_DEFAULTS["STAPEL_ORDERS"]["ADJUSTERS"]},
-    "CHECKOUT_HOOKS": {**preset.SETTINGS_DEFAULTS["STAPEL_ORDERS"]["CHECKOUT_HOOKS"]},
-}
-
 # carrier polling + intent purge (Celery optional: manage.py delivery_housekeeping)
 from stapel_delivery.beat import get_delivery_beat_schedule
 CELERY_BEAT_SCHEDULE = {**get_delivery_beat_schedule()}
+```
+
+Wire it into the orders checkout. A scaffolded project already calls the
+merge helper in `settings.py`: add this brick's preset to that list (the
+helper merges two levels deep, so other presets and your own keys stay):
+
+<!-- orders-wiring:scaffold -->
+```python
+_stapel_merge_preset_defaults(globals(), [
+    # ... the presets already listed (stapel_shop.preset, other companions),
+    "stapel_delivery.preset",
+])
+```
+
+A hand-wired project merges per key instead — **never assign**
+`STAPEL_ORDERS = {...}`: pasted after another fragment it would drop that
+fragment and the host's `PURCHASABLE_TYPES`:
+
+<!-- orders-wiring:hand -->
+```python
+from stapel_delivery.preset import SETTINGS_DEFAULTS as _DELIVERY
+
+STAPEL_ORDERS = globals().get("STAPEL_ORDERS") or {}
+STAPEL_ORDERS = {
+    **STAPEL_ORDERS,
+    "ADJUSTERS": {**_DELIVERY["STAPEL_ORDERS"]["ADJUSTERS"], **STAPEL_ORDERS.get("ADJUSTERS", {})},
+    "CHECKOUT_HOOKS": {**_DELIVERY["STAPEL_ORDERS"]["CHECKOUT_HOOKS"], **STAPEL_ORDERS.get("CHECKOUT_HOOKS", {})},
+}
 ```
 
 Methods, zones, rates and pickup points are configured in the Django admin.
