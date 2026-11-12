@@ -66,14 +66,14 @@ rides `code`, `label` or `meta` (orders keeps those past GDPR erasure).
 
 `context.delivery = {"method": code, "address": {...} | "address_id": id |
 "pickup_point": code}`. A guest (`user_id` null) must send the address
-inline (`address_id` reads the book of `user_id` only).
+inline (`address_id` reads the book of `user_id` only). Validation is
+`AddressSnapshotSerializer` (the same rules as the book). Errors come back
+as `{"code": "error.<4xx>.<slug>", "field": "delivery.<…>", "params"}`.
 
 Ownership: the payloads' `actor_id` (the acting account, a guest's own id
 too) owns intents and shipments when present; without it, `user_id`. A
 guest's shipments are therefore listed, merged (`user.merged`) and
-exported/erased by the guest id. Validation is `AddressSnapshotSerializer` (the same rules as the
-book). Errors come back as `{"code": "error.<4xx>.<slug>", "field":
-"delivery.<…>", "params"}`.
+exported/erased by the guest id.
 
 ### Weight and free shipping
 
@@ -116,7 +116,7 @@ Views inherit `StapelAPIView`. Presentation swaps via `STAPEL_SWAP`
 | `MethodListView` | allowed (AllowAny) | — | `DeliveryMethodListSerializer` |
 | `OptionsView` (POST) | allowed | `DeliveryOptionsRequestSerializer` | `DeliveryOptionsResponseSerializer` |
 | `PickupPointListView` | allowed | — | `PickupPointPage` |
-| `AddressListView`, `AddressDetailView`, `AddressDefaultView` | allowed (guest session keeps a book), `user_id == me`, foreign = 404 | `AddressRequestSerializer` | `AddressResponseSerializer` / `AddressListSerializer` |
+| `AddressListView`, `AddressDetailView`, `AddressDefaultView` | refused: a guest has no book (`IsNotAnonymousUser` → 403); a real account, `user_id == me`, foreign = 404 | `AddressRequestSerializer` | `AddressResponseSerializer` / `AddressListSerializer` |
 | `ShipmentListView`, `ShipmentDetailView` | allowed, `user_id == me`, no staff bypass | — | `ShipmentPage` / `ShipmentResponseSerializer` |
 | `StaffShipmentListView`, `StaffShipmentTrackingView`, `StaffShipmentTransitionView` | denied, `IsStaffUser` | `ShipmentTrackingRequestSerializer` / `ShipmentTransitionRequestSerializer` | `ShipmentPage` / `ShipmentResponseSerializer` |
 
