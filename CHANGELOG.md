@@ -12,6 +12,11 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- Orders seam gate `tests/test_orders_seam.py`: payloads validated against
+  orders' own Function schemas (fixtures pinned by orders sha), then against
+  ours, then sent through comm; answers validated against orders' result
+  schemas. Hook/adjuster input schemas declare `user_id` and `actor_id` and
+  stay open to additive keys; outputs stay strict.
 - Error translations `translations/errors.{ru,es}.json` for every owned
   key (shipped in the wheel), gated by `tests/test_error_i18n.py` (coverage,
   placeholders, byte form, package-data).
