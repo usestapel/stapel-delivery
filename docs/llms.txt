@@ -2,7 +2,7 @@
 
 Delivery methods (courier, pickup point, digital), zones matched by country / region / postcode prefix, rates (flat, free above a subtotal, per kilogram when cart lines carry attrs.weight_grams), pickup points with hours and coordinates, a per-user address book with one default, and shipments with a table FSM (pending, packed, shipped, delivered, returned, cancelled), a timeline, tracking number and link. It is the stapel-orders shipping adjuster (delivery.quote, kind shipping, order 200; honours a promotion's meta.free_shipping marker) and a checkout hook (delivery.reserve keeps the validated choice and the address snapshot under the checkout attempt key; commit creates the order's shipment; release on cancel cancels it). Carriers are a strategy registry: manual by default, an auto-advancing mock for prototypes, a documented Carrier ABC for real ones.
 
-Contract: axes 2 · surface 9 · extension points 12 · operations 15 · error codes 53 · flows 4.
+Contract: axes 2 · surface 9 · extension points 12 · operations 15 · error codes 54 · flows 4.
 Generated from docs/capabilities.json by `stapel-llms-txt` — do not edit; drift-gated by `make contract-check`.
 
 ## Configuration axes — what a product switches on
@@ -88,15 +88,16 @@ Paths are relative to `/delivery/api/v1/`.
 - POST /staff/shipments/{shipment_id}/tracking/ — delivery_staff_shipments_tracking
 - POST /staff/shipments/{shipment_id}/transition/ — delivery_staff_shipments_transition
 
-## Error codes (53) — the StapelError envelope
+## Error codes (54) — the StapelError envelope
 Render `t(code, params)`; branch UX on the remediation. Localized text lives in docs/errors.<lang>.md, not here.
 - error.400.bad_request [400] fix_input
 - error.400.captcha_invalid [400] retry
 - error.400.captcha_required [400] retry
-- error.400.delivery_address_invalid [400] fix_input
+- error.400.carrier_unknown [400] fix_input {carrier}
+- error.400.delivery_address_invalid [400] fix_input {field}
 - error.400.delivery_address_required [400] fix_input
 - error.400.delivery_method_required [400] fix_input
-- error.400.delivery_method_unknown [400] fix_input
+- error.400.delivery_method_unknown [400] fix_input {method}
 - error.400.expected_list [400] fix_input
 - error.400.field.blank [400] fix_input {field}
 - error.400.field.does_not_exist [400] fix_input {field}
@@ -111,7 +112,7 @@ Render `t(code, params)`; branch UX on the remediation. Localized text lives in 
 - error.400.field.unique [400] fix_input {field}
 - error.400.invalid_ad_id [400] fix_input
 - error.400.pickup_point_required [400] fix_input
-- error.400.pickup_point_unknown [400] fix_input
+- error.400.pickup_point_unknown [400] fix_input {pickup_point}
 - error.400.validation_error [400] fix_input
 - error.400.verification_failed [400] verify
 - error.400.verification_invalid_factor [400] verify
@@ -130,7 +131,7 @@ Render `t(code, params)`; branch UX on the remediation. Localized text lives in 
 - error.406.not_acceptable [406] retry
 - error.408.request_timeout [408] retry
 - error.409.conflict [409] fix_input
-- error.409.delivery_unavailable [409] fix_input
+- error.409.delivery_unavailable [409] fix_input {method}
 - error.409.shipment_transition_invalid [409] fix_input {from,to}
 - error.409.too_many_addresses [409] fix_input {max}
 - error.410.gone [410] retry

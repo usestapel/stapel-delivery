@@ -24,11 +24,23 @@
     "owner": "stapel_core"
   },
   {
+    "code": "error.400.carrier_unknown",
+    "status": 400,
+    "params": [
+      "carrier"
+    ],
+    "remediation": "fix_input",
+    "en": "Carrier {carrier} is not registered",
+    "owner": "stapel_delivery"
+  },
+  {
     "code": "error.400.delivery_address_invalid",
     "status": 400,
-    "params": [],
+    "params": [
+      "field"
+    ],
     "remediation": "fix_input",
-    "en": "Check the delivery address",
+    "en": "Check the delivery address: {field}",
     "owner": "stapel_delivery"
   },
   {
@@ -50,9 +62,11 @@
   {
     "code": "error.400.delivery_method_unknown",
     "status": 400,
-    "params": [],
+    "params": [
+      "method"
+    ],
     "remediation": "fix_input",
-    "en": "This delivery method is not available",
+    "en": "Delivery method {method} is not available",
     "owner": "stapel_delivery"
   },
   {
@@ -196,9 +210,11 @@
   {
     "code": "error.400.pickup_point_unknown",
     "status": 400,
-    "params": [],
+    "params": [
+      "pickup_point"
+    ],
     "remediation": "fix_input",
-    "en": "This pickup point is not available",
+    "en": "Pickup point {pickup_point} is not available",
     "owner": "stapel_delivery"
   },
   {
@@ -348,9 +364,11 @@
   {
     "code": "error.409.delivery_unavailable",
     "status": 409,
-    "params": [],
+    "params": [
+      "method"
+    ],
     "remediation": "fix_input",
-    "en": "This delivery method does not deliver to this address",
+    "en": "Delivery method {method} does not deliver to this address",
     "owner": "stapel_delivery"
   },
   {

@@ -12,6 +12,7 @@ ERR_400_DELIVERY_ADDRESS_REQUIRED = "error.400.delivery_address_required"
 ERR_400_DELIVERY_ADDRESS_INVALID = "error.400.delivery_address_invalid"
 ERR_400_PICKUP_POINT_REQUIRED = "error.400.pickup_point_required"
 ERR_400_PICKUP_POINT_UNKNOWN = "error.400.pickup_point_unknown"
+ERR_400_CARRIER_UNKNOWN = "error.400.carrier_unknown"
 ERR_404_ADDRESS_NOT_FOUND = "error.404.address_not_found"
 ERR_404_SHIPMENT_NOT_FOUND = "error.404.shipment_not_found"
 ERR_409_DELIVERY_UNAVAILABLE = "error.409.delivery_unavailable"
@@ -20,14 +21,15 @@ ERR_409_TOO_MANY_ADDRESSES = "error.409.too_many_addresses"
 
 STAPEL_DELIVERY_ERRORS = {
     ERR_400_DELIVERY_METHOD_REQUIRED: "Choose a delivery method",
-    ERR_400_DELIVERY_METHOD_UNKNOWN: "This delivery method is not available",
+    ERR_400_DELIVERY_METHOD_UNKNOWN: "Delivery method {method} is not available",
     ERR_400_DELIVERY_ADDRESS_REQUIRED: "Enter a delivery address",
-    ERR_400_DELIVERY_ADDRESS_INVALID: "Check the delivery address",
+    ERR_400_DELIVERY_ADDRESS_INVALID: "Check the delivery address: {field}",
     ERR_400_PICKUP_POINT_REQUIRED: "Choose a pickup point",
-    ERR_400_PICKUP_POINT_UNKNOWN: "This pickup point is not available",
+    ERR_400_PICKUP_POINT_UNKNOWN: "Pickup point {pickup_point} is not available",
+    ERR_400_CARRIER_UNKNOWN: "Carrier {carrier} is not registered",
     ERR_404_ADDRESS_NOT_FOUND: "Address not found",
     ERR_404_SHIPMENT_NOT_FOUND: "Shipment not found",
-    ERR_409_DELIVERY_UNAVAILABLE: "This delivery method does not deliver to this address",
+    ERR_409_DELIVERY_UNAVAILABLE: "Delivery method {method} does not deliver to this address",
     ERR_409_SHIPMENT_TRANSITION_INVALID: "The shipment cannot move from {from} to {to}",
     ERR_409_TOO_MANY_ADDRESSES: "You can save at most {max} addresses",
 }
@@ -46,6 +48,7 @@ __all__ = [
     "ERR_400_DELIVERY_ADDRESS_INVALID",
     "ERR_400_PICKUP_POINT_REQUIRED",
     "ERR_400_PICKUP_POINT_UNKNOWN",
+    "ERR_400_CARRIER_UNKNOWN",
     "ERR_404_ADDRESS_NOT_FOUND",
     "ERR_404_SHIPMENT_NOT_FOUND",
     "ERR_409_DELIVERY_UNAVAILABLE",

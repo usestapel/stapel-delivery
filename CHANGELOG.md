@@ -12,6 +12,12 @@ First release: delivery methods, rates, pickup points, an address book and
 shipments with tracking, wired into the orders checkout by name.
 
 ### Added
+- Error params declared: `delivery_method_unknown` / `delivery_unavailable`
+  (`method`), `pickup_point_unknown` (`pickup_point`),
+  `delivery_address_invalid` (`field`); an unknown carrier on the tracking
+  endpoint is its own key `error.400.carrier_unknown` (`carrier`).
+  `tests/test_error_params.py` requires every raise site's params to equal
+  its template's placeholders.
 - `GET staff/shipments/{id}/` (staff): one shipment with its timeline and
   `allowed_transitions`.
 - `ShipmentResponse.allowed_transitions`: the statuses the caller may move

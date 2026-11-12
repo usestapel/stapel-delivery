@@ -19,7 +19,7 @@ from stapel_core.comm import mutate_and_emit
 
 from .. import fsm
 from ..carriers import CarrierUpdate, carrier_by_slug, get_carrier
-from ..errors import ERR_404_SHIPMENT_NOT_FOUND, ERR_409_SHIPMENT_TRANSITION_INVALID
+from ..errors import ERR_400_CARRIER_UNKNOWN, ERR_404_SHIPMENT_NOT_FOUND, ERR_409_SHIPMENT_TRANSITION_INVALID
 from ..models import (
     ACTIVE_STATUSES,
     RELEASE_CANCELLED,
@@ -246,15 +246,13 @@ def set_tracking(shipment_id, tracking_number: str, carrier: str | None = None) 
     """Staff record the carrier's tracking number (and optionally the carrier)."""
     from django.core.exceptions import ImproperlyConfigured
 
-    from ..errors import ERR_400_DELIVERY_METHOD_UNKNOWN
-
     with transaction.atomic():
         shipment = Shipment.objects.select_for_update().filter(pk=get_any(shipment_id).pk).get()
         if carrier:
             try:
                 get_carrier(carrier)
             except ImproperlyConfigured:
-                raise DeliveryError(400, ERR_400_DELIVERY_METHOD_UNKNOWN, {"carrier": carrier},
+                raise DeliveryError(400, ERR_400_CARRIER_UNKNOWN, {"carrier": carrier},
                                     field="carrier") from None
             shipment.carrier = carrier
         shipment.tracking_number = tracking_number

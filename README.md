@@ -30,7 +30,7 @@ pip install stapel-delivery
 | Config axes | 2 |
 | Usage surface | 9 |
 | Extension points | 12 |
-| Error codes | 53 |
+| Error codes | 54 |
 | Documented flows | 4 |
 | Fleet dependencies | [`stapel-auth`](https://github.com/usestapel/stapel-auth) (optional) · [`stapel-core`](https://github.com/usestapel/stapel-core) · [`stapel-geo`](https://github.com/usestapel/stapel-geo) (optional) · [`stapel-notifications`](https://github.com/usestapel/stapel-notifications) (optional) · [`stapel-orders`](https://github.com/usestapel/stapel-orders) (optional) · [`stapel-promotions`](https://github.com/usestapel/stapel-promotions) (optional) |
 

@@ -77,7 +77,8 @@ def validate_snapshot(raw, *, field_prefix: str = "delivery.address") -> Recipie
     from ..serializers import AddressSnapshotSerializer
 
     if not isinstance(raw, dict):
-        raise DeliveryError(400, ERR_400_DELIVERY_ADDRESS_INVALID, field=field_prefix)
+        raise DeliveryError(400, ERR_400_DELIVERY_ADDRESS_INVALID,
+                            {"field": field_prefix.rsplit(".", 1)[-1]}, field=field_prefix)
     serializer = AddressSnapshotSerializer(data=raw)
     if not serializer.is_valid():
         first = sorted(serializer.errors)[0]
