@@ -107,8 +107,11 @@ At checkout the client sends its choice in the orders `context`:
 for a pickup method; nothing more for a digital one.)
 
 **Delivery owns the delivery address.** `context.delivery` (`address` /
-`address_id` / `pickup_point`) is the address the shipment is sent to; the
-order keeps no second copy to reconcile. The shipping adjustment's `code`
+`address_id` / `pickup_point`) is the address the shipment is sent to. Orders still requires and stores its own `shipping_address`, which is never
+compared with delivery's. The client sends the ship-to chosen in the delivery
+widget as `shipping_address`, so the buyer types it once, and
+`OrderResponse.address_from_delivery` is true when the order was placed with
+`context.delivery`. The shipping adjustment's `code`
 is the method code (e.g. `courier`), which orders records as the order's
 shipping method.
 

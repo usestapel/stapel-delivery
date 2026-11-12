@@ -143,7 +143,11 @@ answers `"0.00"` so the order records the method.
 **Address authority.** Delivery is authoritative for the delivery address:
 `context.delivery.address` / `address_id` / `pickup_point` is what the
 shipment is sent to (snapshotted on the intent at reserve, copied to the
-shipment at commit). The shipping adjustment's `code` is the method code
+shipment at commit). Orders requires and stores its own `shipping_address`
+(orders' CONTRACT-DELTAS 28) and never compares it with delivery's; the
+client sends the ship-to chosen in the delivery widget as `shipping_address`,
+and `OrderResponse.address_from_delivery` is true when the order was placed
+with `context.delivery`. The shipping adjustment's `code` is the method code
 (≤ 32, non-personal), which orders copies into `Order.shipping_method`.
 
 The request follows orders' CONTRACT-DELTAS: `user_id` is null for a guest

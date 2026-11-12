@@ -58,8 +58,12 @@ shipment goes to is `context.delivery.address` (inline snapshot),
 `context.delivery.address_id` (an entry of the buyer's book, copied at
 reserve) or `context.delivery.pickup_point` (the point's address) —
 validated by delivery, snapshotted on the `DeliveryIntent` at reserve and
-copied to the `Shipment` at commit. Orders does not need (or check) an
-address of its own for a delivered cart. The shipping adjustment's `code`
+copied to the `Shipment` at commit. Orders still requires and stores its
+own `shipping_address` (the buyer's copy), which it never compares with
+delivery's: the client sends the ship-to chosen in the delivery widget as
+`shipping_address`, so the buyer types it once, and
+`OrderResponse.address_from_delivery` is true when the order was placed with
+`context.delivery`. The shipping adjustment's `code`
 is the method code (`DeliveryMethod.code`, ≤ 32 chars, never personal
 data), so orders can copy it into `Order.shipping_method`; the address never
 rides `code`, `label` or `meta` (orders keeps those past GDPR erasure).
